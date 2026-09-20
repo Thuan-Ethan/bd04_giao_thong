@@ -1,6 +1,9 @@
 {
   "ExpandedNodes": [
-    ""
+    "",
+    "\\spark_jobs",
+    "\\spark_jobs\\ingest"
   ],
+  "SelectedNode": "\\spark_jobs\\ingest\\ingest_month.py",
   "PreviewInSolutionExplorer": false
 }
