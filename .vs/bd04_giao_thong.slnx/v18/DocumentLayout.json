@@ -34,8 +34,7 @@
               "RelativeToolTip": "spark_jobs\\ingest\\backfill_bronze.py",
               "ViewState": "AgIAAD0AAAAAAAAAAAAAAF4AAAAKAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.002457|",
-              "WhenOpened": "2026-09-20T02:56:09.704Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-09-20T02:56:09.704Z"
             },
             {
               "$type": "Document",
@@ -47,8 +46,7 @@
               "RelativeToolTip": ".gitignore",
               "ViewState": "AgIAAM4AAAAAAAAAAAAAANsAAAAEAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001407|",
-              "WhenOpened": "2026-09-20T02:10:23.13Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-09-20T02:10:23.13Z"
             },
             {
               "$type": "Document",
@@ -58,7 +56,7 @@
               "RelativeDocumentMoniker": "spark_jobs\\ingest\\nap_thang.py",
               "ToolTip": "C:\\Users\\Admin\\source\\repos\\Thuan-Ethan\\bd04_giao_thong\\spark_jobs\\ingest\\nap_thang.py",
               "RelativeToolTip": "spark_jobs\\ingest\\nap_thang.py",
-              "ViewState": "AgIAADMAAAAAAAAAAAAAAD0AAAAOAAAAAAAAAA==",
+              "ViewState": "AgIAADkAAAAAAAAAAAAAAFMAAAAkAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.002457|",
               "WhenOpened": "2026-09-19T01:37:33.729Z",
               "EditorCaption": ""
