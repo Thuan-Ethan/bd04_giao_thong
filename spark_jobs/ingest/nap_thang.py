@@ -10,8 +10,10 @@ Cách chạy (trên hadoop-master):
 Luồng xử lý:
     1. Đọc file Parquet của tháng
     2. Chuẩn hóa kiểu 5 cột (để các năm dùng chung một schema Delta)
-    3. Sinh khóa trip_id (SHA-256 của 9 cột) + cột nam, thang, source_file, ingested_at
-    4. Kiểm tra trùng khóa trong tháng -> dừng nếu có
+    3. Sinh khóa trip_id (SHA-256 của 9 cột) + cột dup_seq, nam, thang, source_file, ingested_at
+       Các dòng giống hệt nhau (bản ghi lặp của TLC) được giữ lại và đánh số dup_seq = 1, 2, ...
+       trip_id của dòng đầu tiên không đổi, từ dòng thứ hai trở đi được băm thêm dup_seq
+    4. Kiểm tra trùng khóa trong tháng -> dừng nếu vẫn còn trùng
     5. Bảng chưa có -> tạo mới; đã có -> MERGE INTO (chỉ chèn dòng chưa tồn tại)
     6. Đối chiếu số dòng nguồn với số dòng trong bảng cho đúng tháng đó
 """
@@ -19,7 +21,7 @@ import argparse
 import sys
 
 from pyspark import StorageLevel
-from pyspark.sql import SparkSession
+from pyspark.sql import SparkSession, Window
 from pyspark.sql import functions as F
 
 RAW_DIR = "hdfs://hadoop-master:9000/data/raw/tlc/yellow"
@@ -31,7 +33,8 @@ INT_COLS = ["VendorID", "PULocationID", "DOLocationID"]
 LONG_COLS = ["passenger_count", "RatecodeID"]
 
 # 9 cột tạo khóa. 5 cột đầu chưa đủ vì TLC có các cặp bản ghi trùng 5 cột nhưng
-# khác quãng đường/cước (xem docs). Không dùng dropDuplicates để tránh mất dữ liệu thật.
+# khác quãng đường/cước (xem docs). Không dùng dropDuplicates ở bronze để tránh mất dữ liệu:
+# bản ghi lặp hoàn toàn được đánh dup_seq, việc loại bỏ (kèm thống kê) làm ở bronze_to_silver.
 KEY_COLS = [
     "VendorID", "tpep_pickup_datetime", "tpep_dropoff_datetime",
     "PULocationID", "DOLocationID", "passenger_count",
@@ -82,10 +85,23 @@ def normalize_types(df):
 
 
 def add_trip_id(df):
+    data_cols = df.columns
     # coalesce: NULL thành chuỗi "NULL" để không bị concat_ws bỏ qua âm thầm
     # "|" làm dấu phân cách để (1, 23) và (12, 3) không cho cùng một chuỗi
     parts = [F.coalesce(F.col(c).cast("string"), F.lit("NULL")) for c in KEY_COLS]
-    return df.withColumn("trip_id", F.sha2(F.concat_ws("|", *parts), 256))
+    df = df.withColumn("trip_id", F.sha2(F.concat_ws("|", *parts), 256))
+
+    # Đánh số các dòng cùng khóa. Sắp xếp theo mọi cột dữ liệu để thứ tự luôn xác định,
+    # nhờ đó chạy lại cho ra đúng cùng trip_id (idempotent)
+    window = Window.partitionBy("trip_id").orderBy(*[F.col(c) for c in data_cols])
+    df = df.withColumn("dup_seq", F.row_number().over(window))
+
+    # Dòng đầu tiên giữ nguyên trip_id; dòng lặp thứ 2, 3, ... băm thêm dup_seq
+    return df.withColumn(
+        "trip_id",
+        F.when(F.col("dup_seq") == 1, F.col("trip_id"))
+         .otherwise(F.sha2(F.concat_ws("|", F.col("trip_id"), F.col("dup_seq").cast("string")), 256)),
+    )
 
 
 def main():
@@ -116,12 +132,13 @@ def main():
         )
 
         source_count = df.count()
+        repeated_rows = df.filter(F.col("dup_seq") > 1).count()
         dup_groups = df.groupBy("trip_id").count().filter("count > 1").count()
-        print(f"[INFO] Số dòng nguồn: {source_count:,} | nhóm trùng trip_id: {dup_groups:,}")
+        print(f"[INFO] Số dòng nguồn: {source_count:,} | dòng lặp hoàn toàn (dup_seq > 1): "
+              f"{repeated_rows:,} | nhóm trùng trip_id: {dup_groups:,}")
 
         if dup_groups > 0:
-            print("[LOI] Có trip_id trùng trong tháng này, dừng để không ghi dữ liệu sai. "
-                  "Xem lại KEY_COLS trước khi nạp.")
+            print("[LOI] Vẫn còn trip_id trùng sau khi đánh dup_seq, dừng để không ghi dữ liệu sai.")
             return 1
 
         version_before = None
