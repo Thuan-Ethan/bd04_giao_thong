@@ -65,6 +65,14 @@ def path_exists(spark, path):
     return fs.exists(jvm_path)
 
 
+def latest_history(spark):
+    return (
+        spark.sql(f"DESCRIBE HISTORY delta.`{BRONZE_PATH}` LIMIT 1")
+        .select("version", "operation", "operationMetrics")
+        .collect()[0]
+    )
+
+
 def normalize_types(df):
     for col in INT_COLS:
         df = df.withColumn(col, F.col(col).cast("int"))
@@ -116,6 +124,7 @@ def main():
                   "Xem lại KEY_COLS trước khi nạp.")
             return 1
 
+        version_before = None
         if not path_exists(spark, BRONZE_PATH + "/_delta_log"):
             print(f"[INFO] Bảng bronze chưa tồn tại, tạo mới tại {BRONZE_PATH}")
             (df.write.format("delta")
@@ -123,6 +132,7 @@ def main():
                .save(BRONZE_PATH))
         else:
             print("[INFO] MERGE INTO bronze.chuyen_di (chỉ chèn dòng chưa có)")
+            version_before = latest_history(spark)["version"]
             df.createOrReplaceTempView("source_month")
             spark.sql(f"""
                 MERGE INTO delta.`{BRONZE_PATH}` AS t
@@ -133,9 +143,13 @@ def main():
 
         # Chỉ số của lần ghi vừa rồi (best-effort, không ảnh hưởng kết quả nạp)
         try:
-            metrics = spark.sql(f"DESCRIBE HISTORY delta.`{BRONZE_PATH}` LIMIT 1") \
-                           .select("operation", "operationMetrics").collect()[0]
-            print(f"[INFO] {metrics['operation']}: {dict(metrics['operationMetrics'])}")
+            last = latest_history(spark)
+            if version_before is not None and last["version"] == version_before:
+                # MERGE không có dòng nào để chèn nên Delta không tạo commit mới
+                print(f"[INFO] MERGE không chèn dòng nào, bảng giữ nguyên version {last['version']}")
+            else:
+                print(f"[INFO] {last['operation']} (version {last['version']}): "
+                      f"{dict(last['operationMetrics'])}")
         except Exception as exc:  # noqa: BLE001
             print(f"[CANH BAO] Không đọc được lịch sử Delta: {exc}")
 
