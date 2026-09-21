@@ -1,140 +1,163 @@
-# spark_jobs/ingest/nap_thang.py
 """
-Ingest ONE MONTH of TLC Yellow Taxi data into the bronze Delta table.
-Idempotent: re-running with the same --nam/--thang does not duplicate rows.
+spark_jobs/ingest/nap_thang.py
 
-Design decisions (see learnings-and-gotchas.md):
-- Column names are kept AS-IS from the source Parquet (no forced renaming),
-  since TLC's schema legitimately differs across years (airport_fee, 
-  cbd_congestion_fee appear/disappear). mergeSchema=true lets Delta absorb
-  these differences naturally instead of us hardcoding a fixed schema.
+Nạp 1 tháng dữ liệu Yellow Taxi (Parquet trên HDFS) vào bảng Delta bronze.chuyen_di.
+Idempotent: chạy lại cùng một tháng không làm nhân đôi dữ liệu.
 
-Usage:
-spark-submit --master yarn \
-  --packages io.delta:delta-spark_2.12:3.1.0 \
-  spark_jobs/ingest/nap_thang.py --nam 2024 --thang 1
+Cách chạy (trên hadoop-master):
+    spark-submit --master yarn spark_jobs/ingest/nap_thang.py --nam 2024 --thang 1
+
+Luồng xử lý:
+    1. Đọc file Parquet của tháng
+    2. Chuẩn hóa kiểu 5 cột (để các năm dùng chung một schema Delta)
+    3. Sinh khóa trip_id (SHA-256 của 9 cột) + cột nam, thang, source_file, ingested_at
+    4. Kiểm tra trùng khóa trong tháng -> dừng nếu có
+    5. Bảng chưa có -> tạo mới; đã có -> MERGE INTO (chỉ chèn dòng chưa tồn tại)
+    6. Đối chiếu số dòng nguồn với số dòng trong bảng cho đúng tháng đó
 """
-
 import argparse
 import sys
+
+from pyspark import StorageLevel
 from pyspark.sql import SparkSession
 from pyspark.sql import functions as F
-from delta.tables import DeltaTable
 
+RAW_DIR = "hdfs://hadoop-master:9000/data/raw/tlc/yellow"
 BRONZE_PATH = "hdfs://hadoop-master:9000/lakehouse/bd04_giao_thong/bronze/chuyen_di"
-RAW_ZONE = "hdfs://hadoop-master:9000/data/raw/tlc/yellow"
+
+# Kiểu chuẩn theo dữ liệu 2024-2025. Năm 2022-2023 lưu các cột này kiểu bigint/double
+# nên phải ép về cùng kiểu trước khi ghi vào một bảng Delta duy nhất.
+INT_COLS = ["VendorID", "PULocationID", "DOLocationID"]
+LONG_COLS = ["passenger_count", "RatecodeID"]
+
+# 9 cột tạo khóa. 5 cột đầu chưa đủ vì TLC có các cặp bản ghi trùng 5 cột nhưng
+# khác quãng đường/cước (xem docs). Không dùng dropDuplicates để tránh mất dữ liệu thật.
+KEY_COLS = [
+    "VendorID", "tpep_pickup_datetime", "tpep_dropoff_datetime",
+    "PULocationID", "DOLocationID", "passenger_count",
+    "trip_distance", "fare_amount", "total_amount",
+]
 
 
-def build_spark_session() -> SparkSession:
+def parse_args():
+    parser = argparse.ArgumentParser(description="Nạp 1 tháng Yellow Taxi vào bronze.chuyen_di")
+    parser.add_argument("--nam", type=int, required=True, help="Năm, ví dụ 2024")
+    parser.add_argument("--thang", type=int, required=True, choices=range(1, 13),
+                        metavar="[1-12]", help="Tháng, 1-12")
+    return parser.parse_args()
+
+
+def build_spark(year, month):
     return (
         SparkSession.builder
-        .appName("bd04_ingest_month")
+        .appName(f"nap_thang_{year}_{month:02d}")
         .config("spark.sql.extensions", "io.delta.sql.DeltaSparkSessionExtension")
         .config("spark.sql.catalog.spark_catalog", "org.apache.spark.sql.delta.catalog.DeltaCatalog")
+        # Cho phép MERGE tự thêm cột mới (cbd_congestion_fee của 2025)
+        .config("spark.databricks.delta.schema.autoMerge.enabled", "true")
         .getOrCreate()
     )
 
 
-def read_month(spark: SparkSession, nam: int, thang: int):
-    """Read one month's raw Parquet, keeping original TLC column names as-is."""
-    month_str = f"{thang:02d}"
-    path = f"{RAW_ZONE}/yellow_tripdata_{nam}-{month_str}.parquet"
+def path_exists(spark, path):
+    jvm_path = spark._jvm.org.apache.hadoop.fs.Path(path)
+    fs = jvm_path.getFileSystem(spark._jsc.hadoopConfiguration())
+    return fs.exists(jvm_path)
 
-    df = spark.read.parquet(path)
 
-    # Surrogate key: TLC files have no natural unique ID per trip.
-    # SHA-256 hash of identifying fields -> deterministic, safe to re-run.
-    # Guard each column with coalesce() since some may be absent depending
-    # on the source year's schema.
-    def safe_col(name: str):
-        return F.coalesce(F.col(name).cast("string"), F.lit("")) if name in df.columns else F.lit("")
-
-    df = df.withColumn(
-        "trip_id",
-        F.sha2(
-            F.concat_ws(
-                "||",
-                safe_col("VendorID"),
-                safe_col("tpep_pickup_datetime"),
-                safe_col("tpep_dropoff_datetime"),
-                safe_col("PULocationID"),
-                safe_col("DOLocationID"),
-            ),
-            256,
-        ),
-    )
-
-    # Partition columns (kept as nam/thang - matches the already-established
-    # bronze table partition scheme, not part of the code-identifier rename)
-    df = df.withColumn("nam", F.lit(nam)).withColumn("thang", F.lit(thang))
-
-    # Audit metadata
-    df = df.withColumn("source_file", F.input_file_name())
-    df = df.withColumn("ingested_at", F.current_timestamp())
-
+def normalize_types(df):
+    for col in INT_COLS:
+        df = df.withColumn(col, F.col(col).cast("int"))
+    for col in LONG_COLS:
+        df = df.withColumn(col, F.col(col).cast("long"))
     return df
 
 
-def merge_into_bronze(spark, df_month, nam: int, thang: int):
-    """Idempotent MERGE into the bronze Delta table, with schema evolution enabled."""
-    """Khử trùng lặp trip_id trong nguồn - MERGE yêu cầu source không có
-    nhiều dòng cùng khớp 1 target row. Trùng trip_id xảy ra khi 2 chuyến
-    khác nhau có cùng VendorID+pickup+dropoff+PULocationID+DOLocationID
-    (thường gặp ở điểm đón/trả đông như sân bay)."""
-    so_dong_truoc = df_month.count()
-    df_month = df_month.dropDuplicates(["trip_id"])
-    so_dong_sau = df_month.count()
-    so_trung = so_dong_truoc - so_dong_sau
-    if so_trung > 0:
-        print(f"[WARN] {nam}-{thang:02d}: loại bỏ {so_trung:,} dòng trùng trip_id (data quality issue)")
-
-    if DeltaTable.isDeltaTable(spark, BRONZE_PATH):
-        bronze_table = DeltaTable.forPath(spark, BRONZE_PATH)
-        (
-            bronze_table.alias("target")
-            .merge(
-                df_month.alias("source"),
-                "target.trip_id = source.trip_id AND target.nam = source.nam AND target.thang = source.thang",
-            )
-            .whenMatchedUpdateAll()
-            .whenNotMatchedInsertAll()
-            .execute()
-        )
-        print(f"[OK] Merged {nam}-{thang:02d} into bronze.chuyen_di")
-    else:
-        (
-            df_month.write.format("delta")
-            .partitionBy("nam", "thang")
-            .mode("overwrite")
-            .option("mergeSchema", "true")
-            .save(BRONZE_PATH)
-        )
-        print(f"[OK] Created bronze.chuyen_di, loaded first month {nam}-{thang:02d}")
+def add_trip_id(df):
+    # coalesce: NULL thành chuỗi "NULL" để không bị concat_ws bỏ qua âm thầm
+    # "|" làm dấu phân cách để (1, 23) và (12, 3) không cho cùng một chuỗi
+    parts = [F.coalesce(F.col(c).cast("string"), F.lit("NULL")) for c in KEY_COLS]
+    return df.withColumn("trip_id", F.sha2(F.concat_ws("|", *parts), 256))
 
 
 def main():
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--nam", type=int, required=True)
-    parser.add_argument("--thang", type=int, required=True)
-    args = parser.parse_args()
+    args = parse_args()
+    year, month = args.nam, args.thang
+    file_name = f"yellow_tripdata_{year}-{month:02d}.parquet"
+    source_path = f"{RAW_DIR}/{file_name}"
 
-    spark = build_spark_session()
-    # mergeSchema at session level so it applies to both write() and merge()
-    spark.conf.set("spark.databricks.delta.schema.autoMerge.enabled", "true")
+    spark = build_spark(year, month)
+    exit_code = 0
+    df = None
 
     try:
-        df_month = read_month(spark, args.nam, args.thang)
-        row_count = df_month.count()
-        print(f"[INFO] Read {row_count:,} rows for {args.nam}-{args.thang:02d}")
+        if not path_exists(spark, source_path):
+            print(f"[LOI] Không thấy file nguồn: {source_path}")
+            return 1
 
-        if row_count == 0:
-            print(f"[WARN] {args.nam}-{args.thang:02d} has no data, skipping.")
-            sys.exit(0)
+        print(f"[INFO] Đọc {source_path}")
+        df = (
+            add_trip_id(normalize_types(spark.read.parquet(source_path)))
+            # nam/thang lấy từ tham số, không lấy từ ngày đón: file TLC thường lẫn
+            # vài dòng có ngày nằm ngoài tháng, lấy từ dữ liệu sẽ làm sai partition
+            .withColumn("nam", F.lit(year).cast("int"))
+            .withColumn("thang", F.lit(month).cast("int"))
+            .withColumn("source_file", F.lit(file_name))
+            .withColumn("ingested_at", F.current_timestamp())
+            .persist(StorageLevel.MEMORY_AND_DISK)
+        )
 
-        merge_into_bronze(spark, df_month, args.nam, args.thang)
+        source_count = df.count()
+        dup_groups = df.groupBy("trip_id").count().filter("count > 1").count()
+        print(f"[INFO] Số dòng nguồn: {source_count:,} | nhóm trùng trip_id: {dup_groups:,}")
+
+        if dup_groups > 0:
+            print("[LOI] Có trip_id trùng trong tháng này, dừng để không ghi dữ liệu sai. "
+                  "Xem lại KEY_COLS trước khi nạp.")
+            return 1
+
+        if not path_exists(spark, BRONZE_PATH + "/_delta_log"):
+            print(f"[INFO] Bảng bronze chưa tồn tại, tạo mới tại {BRONZE_PATH}")
+            (df.write.format("delta")
+               .partitionBy("nam", "thang")
+               .save(BRONZE_PATH))
+        else:
+            print("[INFO] MERGE INTO bronze.chuyen_di (chỉ chèn dòng chưa có)")
+            df.createOrReplaceTempView("source_month")
+            spark.sql(f"""
+                MERGE INTO delta.`{BRONZE_PATH}` AS t
+                USING source_month AS s
+                ON  t.nam = s.nam AND t.thang = s.thang AND t.trip_id = s.trip_id
+                WHEN NOT MATCHED THEN INSERT *
+            """)
+
+        # Chỉ số của lần ghi vừa rồi (best-effort, không ảnh hưởng kết quả nạp)
+        try:
+            metrics = spark.sql(f"DESCRIBE HISTORY delta.`{BRONZE_PATH}` LIMIT 1") \
+                           .select("operation", "operationMetrics").collect()[0]
+            print(f"[INFO] {metrics['operation']}: {dict(metrics['operationMetrics'])}")
+        except Exception as exc:  # noqa: BLE001
+            print(f"[CANH BAO] Không đọc được lịch sử Delta: {exc}")
+
+        table_count = (
+            spark.read.format("delta").load(BRONZE_PATH)
+            .filter((F.col("nam") == year) & (F.col("thang") == month))
+            .count()
+        )
+        print(f"[INFO] Số dòng trong bảng cho {year}-{month:02d}: {table_count:,}")
+
+        if table_count != source_count:
+            print(f"[LOI] Lệch số dòng: nguồn {source_count:,} vs bảng {table_count:,}")
+            exit_code = 1
+        else:
+            print(f"[OK] {year}-{month:02d} đã nạp xong, số dòng khớp.")
     finally:
+        if df is not None:
+            df.unpersist()
         spark.stop()
+
+    return exit_code
 
 
 if __name__ == "__main__":
-    main()
+    sys.exit(main())
