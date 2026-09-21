@@ -75,8 +75,19 @@ def read_month(spark: SparkSession, nam: int, thang: int):
     return df
 
 
-def merge_into_bronze(spark: SparkSession, df_month, nam: int, thang: int):
+def merge_into_bronze(spark, df_month, nam: int, thang: int):
     """Idempotent MERGE into the bronze Delta table, with schema evolution enabled."""
+    """Khử trùng lặp trip_id trong nguồn - MERGE yêu cầu source không có
+    nhiều dòng cùng khớp 1 target row. Trùng trip_id xảy ra khi 2 chuyến
+    khác nhau có cùng VendorID+pickup+dropoff+PULocationID+DOLocationID
+    (thường gặp ở điểm đón/trả đông như sân bay)."""
+    so_dong_truoc = df_month.count()
+    df_month = df_month.dropDuplicates(["trip_id"])
+    so_dong_sau = df_month.count()
+    so_trung = so_dong_truoc - so_dong_sau
+    if so_trung > 0:
+        print(f"[WARN] {nam}-{thang:02d}: loại bỏ {so_trung:,} dòng trùng trip_id (data quality issue)")
+
     if DeltaTable.isDeltaTable(spark, BRONZE_PATH):
         bronze_table = DeltaTable.forPath(spark, BRONZE_PATH)
         (
@@ -91,7 +102,6 @@ def merge_into_bronze(spark: SparkSession, df_month, nam: int, thang: int):
         )
         print(f"[OK] Merged {nam}-{thang:02d} into bronze.chuyen_di")
     else:
-        # First run ever: table doesn't exist yet, create it
         (
             df_month.write.format("delta")
             .partitionBy("nam", "thang")
