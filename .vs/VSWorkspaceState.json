@@ -2,8 +2,7 @@
   "ExpandedNodes": [
     "",
     "\\spark_jobs",
-    "\\spark_jobs\\ingest"
+    "\\spark_jobs\\transform"
   ],
-  "SelectedNode": "\\spark_jobs\\ingest\\nap_thang.py",
   "PreviewInSolutionExplorer": false
 }
