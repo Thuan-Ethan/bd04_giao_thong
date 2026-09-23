@@ -146,15 +146,20 @@ def main():
         loai_bo = F.lit(False)
         for dieu_kien, ten in RULES_LOAI:
             dk = dieu_kien.replace("dup_seq", "_dup_seq")
-            n = df.filter(dk).count()
+            # coalesce(..., False): NULL (vd so_khach thiếu) không được tính là "loại",
+            # tránh bẫy logic 3 giá trị của SQL (NULL OR False = NULL, không phải False,
+            # khiến .filter(~loai_bo) âm thầm loại luôn cả dòng không khớp luật nào)
+            dieu_kien_an_toan = F.coalesce(F.expr(dk), F.lit(False))
+            n = df.filter(dieu_kien_an_toan).count()
             rule_counts[ten] = n
             print(f"[INFO]   Loai theo '{ten}': {n:,} ({n/total*100:.3f}%)")
-            loai_bo = loai_bo | F.expr(dk)
+            loai_bo = loai_bo | dieu_kien_an_toan
 
         con_lai = df.filter(~loai_bo)
-        vung_loi = (
+        vung_loi = F.coalesce(
             (F.col("vung_don") < VUNG_MIN) | (F.col("vung_don") > VUNG_MAX)
-            | (F.col("vung_tra") < VUNG_MIN) | (F.col("vung_tra") > VUNG_MAX)
+            | (F.col("vung_tra") < VUNG_MIN) | (F.col("vung_tra") > VUNG_MAX),
+            F.lit(False),
         )
         df_quarantine = con_lai.filter(vung_loi).drop("_dup_seq")
         df_sach = con_lai.filter(~vung_loi).drop("_dup_seq")
