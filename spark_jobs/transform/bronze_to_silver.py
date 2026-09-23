@@ -155,6 +155,20 @@ def main():
             print(f"[INFO]   Loai theo '{ten}': {n:,} ({n/total*100:.3f}%)")
             loai_bo = loai_bo | dieu_kien_an_toan
 
+        # nam/thang là generated column tính từ thoi_diem_don, nên khi ghi với replaceWhere
+        # "nam=X AND thang=Y", MỌI dòng phải thật sự tính ra đúng X/Y từ thoi_diem_don --
+        # nếu không Delta từ chối ghi (CHECK constraint). Một số ít dòng TLC có
+        # thoi_diem_don sai lệch (khác tháng khai báo trong tên file, có khi khác cả năm),
+        # nên bắt buộc phải loại trước khi ghi, không chỉ để "làm sạch" mà để bảo đảm ghi được.
+        lech_thang = F.coalesce(
+            (F.year("thoi_diem_don") != year) | (F.month("thoi_diem_don") != month),
+            F.lit(True),  # thoi_diem_don NULL -> không xác định được nam/thang -> loại
+        )
+        n_lech = df.filter(lech_thang).count()
+        rule_counts["ngay_don_lech_thang_khai_bao"] = n_lech
+        print(f"[INFO]   Loai theo 'ngay_don_lech_thang_khai_bao': {n_lech:,} ({n_lech/total*100:.3f}%)")
+        loai_bo = loai_bo | lech_thang
+
         con_lai = df.filter(~loai_bo)
         vung_loi = F.coalesce(
             (F.col("vung_don") < VUNG_MIN) | (F.col("vung_don") > VUNG_MAX)
