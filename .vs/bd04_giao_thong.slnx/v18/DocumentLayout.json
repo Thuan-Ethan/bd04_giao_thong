@@ -7,8 +7,8 @@
       "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:spark_jobs\\ingest\\nap_thang.py||{8B382828-6202-11D1-8870-0000F87579D2}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\Admin\\source\\repos\\Thuan-Ethan\\bd04_giao_thong\\spark_jobs\\ingest\\backfill_bronze.py||{8B382828-6202-11D1-8870-0000F87579D2}",
-      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:spark_jobs\\ingest\\backfill_bronze.py||{8B382828-6202-11D1-8870-0000F87579D2}"
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\Admin\\source\\repos\\Thuan-Ethan\\bd04_giao_thong\\spark_jobs\\ingest\\backfill_missing.sh||{8B382828-6202-11D1-8870-0000F87579D2}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:spark_jobs\\ingest\\backfill_missing.sh||{8B382828-6202-11D1-8870-0000F87579D2}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\Admin\\source\\repos\\Thuan-Ethan\\bd04_giao_thong\\.gitignore||{3B902123-F8A7-4915-9F01-361F908088D0}",
@@ -27,14 +27,15 @@
             {
               "$type": "Document",
               "DocumentIndex": 1,
-              "Title": "backfill_bronze.py",
-              "DocumentMoniker": "C:\\Users\\Admin\\source\\repos\\Thuan-Ethan\\bd04_giao_thong\\spark_jobs\\ingest\\backfill_bronze.py",
-              "RelativeDocumentMoniker": "spark_jobs\\ingest\\backfill_bronze.py",
-              "ToolTip": "C:\\Users\\Admin\\source\\repos\\Thuan-Ethan\\bd04_giao_thong\\spark_jobs\\ingest\\backfill_bronze.py",
-              "RelativeToolTip": "spark_jobs\\ingest\\backfill_bronze.py",
-              "ViewState": "AgIAAD0AAAAAAAAAAAAAAF4AAAAKAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.002457|",
-              "WhenOpened": "2026-09-20T02:56:09.704Z"
+              "Title": "backfill_missing.sh",
+              "DocumentMoniker": "C:\\Users\\Admin\\source\\repos\\Thuan-Ethan\\bd04_giao_thong\\spark_jobs\\ingest\\backfill_missing.sh",
+              "RelativeDocumentMoniker": "spark_jobs\\ingest\\backfill_missing.sh",
+              "ToolTip": "C:\\Users\\Admin\\source\\repos\\Thuan-Ethan\\bd04_giao_thong\\spark_jobs\\ingest\\backfill_missing.sh",
+              "RelativeToolTip": "spark_jobs\\ingest\\backfill_missing.sh",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAYAAAAYAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000614|",
+              "WhenOpened": "2026-09-20T02:56:09.704Z",
+              "EditorCaption": ""
             },
             {
               "$type": "Document",
@@ -46,7 +47,8 @@
               "RelativeToolTip": ".gitignore",
               "ViewState": "AgIAAM4AAAAAAAAAAAAAANsAAAAEAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001407|",
-              "WhenOpened": "2026-09-20T02:10:23.13Z"
+              "WhenOpened": "2026-09-20T02:10:23.13Z",
+              "EditorCaption": ""
             },
             {
               "$type": "Document",
@@ -56,7 +58,7 @@
               "RelativeDocumentMoniker": "spark_jobs\\ingest\\nap_thang.py",
               "ToolTip": "C:\\Users\\Admin\\source\\repos\\Thuan-Ethan\\bd04_giao_thong\\spark_jobs\\ingest\\nap_thang.py",
               "RelativeToolTip": "spark_jobs\\ingest\\nap_thang.py",
-              "ViewState": "AgIAADkAAAAAAAAAAAAAAFMAAAAkAAAAAAAAAA==",
+              "ViewState": "AgIAAAIAAAAAAAAAAAAgwLsAAAAUAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.002457|",
               "WhenOpened": "2026-09-19T01:37:33.729Z",
               "EditorCaption": ""
