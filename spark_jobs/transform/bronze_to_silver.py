@@ -85,6 +85,7 @@ def select_columns(df):
         ).alias("thoi_gian_phut"),
         F.col("total_amount").alias("tong_tien"),
         payment_label(F.col("payment_type")).alias("hinh_thuc_tt"),
+        F.col("dup_seq").alias("_dup_seq"),
     ).withColumn(
         "van_toc_tb_mph",
         F.when(F.col("thoi_gian_phut") > 0,
@@ -139,7 +140,7 @@ def main():
             return 1
         print(f"[INFO] Tong so dong bronze: {total:,}")
 
-        df = select_columns(raw).withColumn("_dup_seq", raw["dup_seq"])
+        df = select_columns(raw)
 
         rule_counts = {}
         loai_bo = F.lit(False)
