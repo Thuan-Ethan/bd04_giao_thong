@@ -2,7 +2,9 @@
   "ExpandedNodes": [
     "",
     "\\spark_jobs",
-    "\\spark_jobs\\transform"
+    "\\spark_jobs\\transform",
+    "\\webapp"
   ],
+  "SelectedNode": "\\dags",
   "PreviewInSolutionExplorer": false
 }
