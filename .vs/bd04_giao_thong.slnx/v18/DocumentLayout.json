@@ -3,6 +3,10 @@
   "WorkspaceRootPath": "C:\\Users\\Admin\\source\\repos\\Thuan-Ethan\\bd04_giao_thong\\",
   "Documents": [
     {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\Admin\\source\\repos\\Thuan-Ethan\\bd04_giao_thong\\spark_jobs\\transform\\tao_ma_tran_od.py||{8B382828-6202-11D1-8870-0000F87579D2}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:spark_jobs\\transform\\tao_ma_tran_od.py||{8B382828-6202-11D1-8870-0000F87579D2}"
+    },
+    {
       "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\Admin\\source\\repos\\Thuan-Ethan\\bd04_giao_thong\\conf\\spark-defaults.conf||{3B902123-F8A7-4915-9F01-361F908088D0}",
       "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:conf\\spark-defaults.conf||{3B902123-F8A7-4915-9F01-361F908088D0}"
     },
@@ -42,11 +46,24 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 1,
+          "SelectedChildIndex": 0,
           "Children": [
             {
               "$type": "Document",
-              "DocumentIndex": 2,
+              "DocumentIndex": 0,
+              "Title": "tao_ma_tran_od.py",
+              "DocumentMoniker": "C:\\Users\\Admin\\source\\repos\\Thuan-Ethan\\bd04_giao_thong\\spark_jobs\\transform\\tao_ma_tran_od.py",
+              "RelativeDocumentMoniker": "spark_jobs\\transform\\tao_ma_tran_od.py",
+              "ToolTip": "C:\\Users\\Admin\\source\\repos\\Thuan-Ethan\\bd04_giao_thong\\spark_jobs\\transform\\tao_ma_tran_od.py",
+              "RelativeToolTip": "spark_jobs\\transform\\tao_ma_tran_od.py",
+              "ViewState": "AgIAACQAAAAAAAAAAAAAACgAAAARAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.002457|",
+              "WhenOpened": "2026-09-25T10:59:27.665Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
               "Title": ".env.example",
               "DocumentMoniker": "C:\\Users\\Admin\\source\\repos\\Thuan-Ethan\\bd04_giao_thong\\conf\\.env.example",
               "RelativeDocumentMoniker": "conf\\.env.example",
@@ -54,12 +71,11 @@
               "RelativeToolTip": "conf\\.env.example",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001001|",
-              "WhenOpened": "2026-09-25T05:45:30.884Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-09-25T05:45:30.884Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 0,
+              "DocumentIndex": 1,
               "Title": "spark-defaults.conf",
               "DocumentMoniker": "C:\\Users\\Admin\\source\\repos\\Thuan-Ethan\\bd04_giao_thong\\conf\\spark-defaults.conf",
               "RelativeDocumentMoniker": "conf\\spark-defaults.conf",
@@ -67,12 +83,11 @@
               "RelativeToolTip": "conf\\spark-defaults.conf",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAgAAAADAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000601|",
-              "WhenOpened": "2026-09-25T05:45:15.223Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-09-25T05:45:15.223Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 1,
+              "DocumentIndex": 2,
               "Title": "hdfs-site.xml",
               "DocumentMoniker": "C:\\Users\\Admin\\source\\repos\\Thuan-Ethan\\bd04_giao_thong\\conf\\hdfs-site.xml",
               "RelativeDocumentMoniker": "conf\\hdfs-site.xml",
@@ -80,12 +95,11 @@
               "RelativeToolTip": "conf\\hdfs-site.xml",
               "ViewState": "AgIAABUAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003576|",
-              "WhenOpened": "2026-09-25T05:45:06.641Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-09-25T05:45:06.641Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 3,
+              "DocumentIndex": 4,
               "Title": ".gitkeep",
               "DocumentMoniker": "C:\\Users\\Admin\\source\\repos\\Thuan-Ethan\\bd04_giao_thong\\spark_jobs\\transform\\.gitkeep",
               "RelativeDocumentMoniker": "spark_jobs\\transform\\.gitkeep",
@@ -93,12 +107,11 @@
               "RelativeToolTip": "spark_jobs\\transform\\.gitkeep",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001407|",
-              "WhenOpened": "2026-09-23T23:51:05.948Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-09-23T23:51:05.948Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 4,
+              "DocumentIndex": 5,
               "Title": "tao_nhu_cau.py",
               "DocumentMoniker": "C:\\Users\\Admin\\source\\repos\\Thuan-Ethan\\bd04_giao_thong\\spark_jobs\\transform\\tao_nhu_cau.py",
               "RelativeDocumentMoniker": "spark_jobs\\transform\\tao_nhu_cau.py",
@@ -110,7 +123,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 5,
+              "DocumentIndex": 6,
               "Title": "bronze_to_silver.py",
               "DocumentMoniker": "C:\\Users\\Admin\\source\\repos\\Thuan-Ethan\\bd04_giao_thong\\spark_jobs\\transform\\bronze_to_silver.py",
               "RelativeDocumentMoniker": "spark_jobs\\transform\\bronze_to_silver.py",
@@ -122,7 +135,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 7,
+              "DocumentIndex": 8,
               "Title": ".gitignore",
               "DocumentMoniker": "C:\\Users\\Admin\\source\\repos\\Thuan-Ethan\\bd04_giao_thong\\.gitignore",
               "RelativeDocumentMoniker": ".gitignore",
@@ -134,7 +147,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 6,
+              "DocumentIndex": 7,
               "Title": "nap_thang.py",
               "DocumentMoniker": "C:\\Users\\Admin\\source\\repos\\Thuan-Ethan\\bd04_giao_thong\\spark_jobs\\ingest\\nap_thang.py",
               "RelativeDocumentMoniker": "spark_jobs\\ingest\\nap_thang.py",

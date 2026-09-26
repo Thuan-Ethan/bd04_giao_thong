@@ -5,6 +5,6 @@
     "\\spark_jobs\\transform",
     "\\webapp"
   ],
-  "SelectedNode": "\\dags",
+  "SelectedNode": "\\spark_jobs\\transform\\tao_ma_tran_od.py",
   "PreviewInSolutionExplorer": false
 }
