@@ -2,9 +2,11 @@
   "ExpandedNodes": [
     "",
     "\\spark_jobs",
-    "\\spark_jobs\\transform",
-    "\\webapp"
+    "\\spark_jobs\\ingest",
+    "\\spark_jobs\\ml",
+    "\\spark_jobs\\streaming",
+    "\\webapp\\frontend"
   ],
-  "SelectedNode": "\\spark_jobs\\transform\\tao_ma_tran_od.py",
+  "SelectedNode": "\\spark_jobs\\ingest\\nap_thang.py",
   "PreviewInSolutionExplorer": false
 }

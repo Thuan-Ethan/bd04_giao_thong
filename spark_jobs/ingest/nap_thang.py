@@ -1,194 +1,148 @@
 """
-spark_jobs/ingest/nap_thang.py
+Functions/nap_thang.py - Nap 1 thang Parquet TLC vao bronze.chuyen_di (de cuong muc 4.5,
+ingest/nap_thang.py). Day la buoc dau tien cua chuoi pipeline, duoc DAG gt_nap_thang_moi va
+gt_backfill goi lai cho tung thang.
 
-Nạp 1 tháng dữ liệu Yellow Taxi (Parquet trên HDFS) vào bảng Delta bronze.chuyen_di.
-Idempotent: chạy lại cùng một tháng không làm nhân đôi dữ liệu.
+Quy uoc da chot tu phien lam viec truoc (xem docs/00-nhat-ky-quyet-dinh.md TH-09/TH-10, da
+ap dung dung trong nap_vao_bronze() cua xu_ly_va_du_bao.py cho tung gio -- file nay la ban
+tuong duong cho ca 1 thang):
+    - Giu nguyen schema goc tung thang (KHONG ep ve 1 schema chung) -- dung mergeSchema=true
+      khi ghi, Delta tu hop nhat schema qua cac lan nap khac nam.
+    - Them cot: ma_chuyen (SHA-256 toan bo cot goc, dung lam khoa MERGE idempotent),
+      nam/thang (LAY THEO THANG CUA FILE NGUON -- khac voi silver.chuyen_di: nam/thang o silver
+      la generated column tinh tu thoi_diem_don, con o day la gia tri khai bao tu tham so dong
+      lenh, giu nguyen cho du vai dong co thoi_diem_don loi/khac thang trong file goc),
+      ten_file_nguon, thoi_diem_nap.
+    - Ban ghi trung hoan toan trong CUNG 1 file duoc gop con 1 TRUOC MERGE (dropDuplicates theo
+      ma_chuyen) -- neu khong, MERGE voi khoa nguon trung se chen ca hai, mat tinh idempotent.
+    - MERGE theo (nam, thang, ma_chuyen) -- chi quet dung partition thang dang nap, khong
+      MERGE toan bang.
 
-Cách chạy (trên hadoop-master):
-    spark-submit --master yarn spark_jobs/ingest/nap_thang.py --nam 2024 --thang 1
+Idempotent: chay lai lenh cho cung 1 thang se MERGE 0 dong moi (dedup lai tu dau).
 
-Luồng xử lý:
-    1. Đọc file Parquet của tháng
-    2. Chuẩn hóa kiểu 5 cột (để các năm dùng chung một schema Delta)
-    3. Sinh khóa trip_id (SHA-256 của 9 cột) + cột dup_seq, nam, thang, source_file, ingested_at
-       Các dòng giống hệt nhau (bản ghi lặp của TLC) được giữ lại và đánh số dup_seq = 1, 2, ...
-       trip_id của dòng đầu tiên không đổi, từ dòng thứ hai trở đi được băm thêm dup_seq
-    4. Kiểm tra trùng khóa trong tháng -> dừng nếu vẫn còn trùng
-    5. Bảng chưa có -> tạo mới; đã có -> MERGE INTO (chỉ chèn dòng chưa tồn tại)
-    6. Đối chiếu số dòng nguồn với số dòng trong bảng cho đúng tháng đó
+    spark-submit --packages io.delta:delta-spark_2.12:3.1.0 \
+        --conf spark.sql.extensions=io.delta.sql.DeltaSparkSessionExtension \
+        --conf spark.sql.catalog.spark_catalog=org.apache.spark.sql.delta.catalog.DeltaCatalog \
+        nap_thang.py --nam 2024 --thang 1
 """
 import argparse
 import sys
 
-from pyspark import StorageLevel
-from pyspark.sql import SparkSession, Window
+from delta.tables import DeltaTable
+from pyspark.sql import SparkSession
 from pyspark.sql import functions as F
 
-RAW_DIR = "hdfs://hadoop-master:9000/data/raw/tlc/yellow"
+RAW_TLC = "hdfs://hadoop-master:9000/data/raw/tlc/yellow"
 BRONZE_PATH = "hdfs://hadoop-master:9000/lakehouse/bd04_giao_thong/bronze/chuyen_di"
 
-# Kiểu chuẩn theo dữ liệu 2024-2025. Năm 2022-2023 lưu các cột này kiểu bigint/double
-# nên phải ép về cùng kiểu trước khi ghi vào một bảng Delta duy nhất.
-INT_COLS = ["VendorID", "PULocationID", "DOLocationID"]
-LONG_COLS = ["passenger_count", "RatecodeID"]
 
-# 9 cột tạo khóa. 5 cột đầu chưa đủ vì TLC có các cặp bản ghi trùng 5 cột nhưng
-# khác quãng đường/cước (xem docs). Không dùng dropDuplicates ở bronze để tránh mất dữ liệu:
-# bản ghi lặp hoàn toàn được đánh dup_seq, việc loại bỏ (kèm thống kê) làm ở bronze_to_silver.
-KEY_COLS = [
-    "VendorID", "tpep_pickup_datetime", "tpep_dropoff_datetime",
-    "PULocationID", "DOLocationID", "passenger_count",
-    "trip_distance", "fare_amount", "total_amount",
-]
-
-
-def parse_args():
-    parser = argparse.ArgumentParser(description="Nạp 1 tháng Yellow Taxi vào bronze.chuyen_di")
-    parser.add_argument("--nam", type=int, required=True, help="Năm, ví dụ 2024")
-    parser.add_argument("--thang", type=int, required=True, choices=range(1, 13),
-                        metavar="[1-12]", help="Tháng, 1-12")
-    return parser.parse_args()
-
-
-def build_spark(year, month):
-    return (
-        SparkSession.builder
-        .appName(f"nap_thang_{year}_{month:02d}")
-        .config("spark.sql.extensions", "io.delta.sql.DeltaSparkSessionExtension")
-        .config("spark.sql.catalog.spark_catalog", "org.apache.spark.sql.delta.catalog.DeltaCatalog")
-        # Cho phép MERGE tự thêm cột mới (cbd_congestion_fee của 2025)
-        .config("spark.databricks.delta.schema.autoMerge.enabled", "true")
-        .getOrCreate()
-    )
-
-
-def path_exists(spark, path):
-    jvm_path = spark._jvm.org.apache.hadoop.fs.Path(path)
+def _duong_dan_ton_tai(spark, duong_dan):
+    jvm_path = spark._jvm.org.apache.hadoop.fs.Path(duong_dan)
     fs = jvm_path.getFileSystem(spark._jsc.hadoopConfiguration())
     return fs.exists(jvm_path)
 
 
-def latest_history(spark):
-    return (
-        spark.sql(f"DESCRIBE HISTORY delta.`{BRONZE_PATH}` LIMIT 1")
-        .select("version", "operation", "operationMetrics")
-        .collect()[0]
+def doc_parquet_thang(spark, nam, thang):
+    duong_dan = f"{RAW_TLC}/yellow_tripdata_{nam}-{thang:02d}.parquet"
+    return spark.read.parquet(duong_dan)
+
+
+def nap_thang(spark, df_tho, nam, thang):
+    """Tra ve (df_da_ghep_cot, so_dong_nguon, so_dong_sau_dedup) -- chua ghi, de ham goi kiem
+    tra truoc khi ghi that (vd DAG 1 kiem_tra_schema() can doc cot ma khong ghi)."""
+    cot_goc = df_tho.columns
+    so_dong_nguon = df_tho.count()
+    df = (
+        df_tho.withColumn("ma_chuyen", F.sha2(F.concat_ws(
+            "|", *[F.coalesce(F.col(c).cast("string"), F.lit("")) for c in cot_goc]), 256))
+        .withColumn("nam", F.lit(nam).cast("int"))
+        .withColumn("thang", F.lit(thang).cast("int"))
+        .withColumn("ten_file_nguon", F.lit(f"yellow_tripdata_{nam}-{thang:02d}.parquet"))
+        .withColumn("thoi_diem_nap", F.current_timestamp())
+        .dropDuplicates(["ma_chuyen"])
+        # QUAN TRONG (phat hien qua chay that 2024-01): MERGE insert-only cua Delta don toan bo
+        # ban ghi vao DUNG 1 task ghi neu khong ep lai so phan vung -- voi ~3 trieu dong/thang,
+        # 1 task ghi tuan tu tren 1 loi CPU cuc ky cham (~0,3MB/s quan sat duoc). Ep repartition
+        # de Delta chia viec ghi ra nhieu task song song, dung het so container cum dang co.
+        .repartition(8)
     )
+    so_dong_sau_dedup = df.count()
+    return df, so_dong_nguon, so_dong_sau_dedup
 
 
-def normalize_types(df):
-    for col in INT_COLS:
-        df = df.withColumn(col, F.col(col).cast("int"))
-    for col in LONG_COLS:
-        df = df.withColumn(col, F.col(col).cast("long"))
-    return df
+def ghi_bronze(spark, df, nam, thang, merge_schema=False):
+    """MERGE theo (nam, thang, ma_chuyen) -- chi quet dung partition dang nap. Tra ve so dong
+    thuc su duoc chen moi (dem partition truoc/sau, giong quy uoc da dung cho silver/gold).
 
+    merge_schema=True: dung khi DAG gt_nap_thang_moi phat hien schema thang moi khac schema
+    chuan (kiem_tra_schema.py) -- bat autoMerge de Delta tu hop nhat schema (them/bo cot) ngay
+    trong lenh MERGE, thay vi nem AnalysisException."""
+    if merge_schema:
+        spark.conf.set("spark.databricks.delta.schema.autoMerge.enabled", "true")
 
-def add_trip_id(df):
-    data_cols = df.columns
-    # coalesce: NULL thành chuỗi "NULL" để không bị concat_ws bỏ qua âm thầm
-    # "|" làm dấu phân cách để (1, 23) và (12, 3) không cho cùng một chuỗi
-    parts = [F.coalesce(F.col(c).cast("string"), F.lit("NULL")) for c in KEY_COLS]
-    df = df.withColumn("trip_id", F.sha2(F.concat_ws("|", *parts), 256))
+    if not _duong_dan_ton_tai(spark, BRONZE_PATH + "/_delta_log"):
+        ghi = df.write.format("delta").partitionBy("nam", "thang")
+        if merge_schema:
+            ghi = ghi.option("mergeSchema", "true")
+        ghi.save(BRONZE_PATH)
+        return df.count()
 
-    # Đánh số các dòng cùng khóa. Sắp xếp theo mọi cột dữ liệu để thứ tự luôn xác định,
-    # nhờ đó chạy lại cho ra đúng cùng trip_id (idempotent)
-    window = Window.partitionBy("trip_id").orderBy(*[F.col(c) for c in data_cols])
-    df = df.withColumn("dup_seq", F.row_number().over(window))
-
-    # Dòng đầu tiên giữ nguyên trip_id; dòng lặp thứ 2, 3, ... băm thêm dup_seq
-    return df.withColumn(
-        "trip_id",
-        F.when(F.col("dup_seq") == 1, F.col("trip_id"))
-         .otherwise(F.sha2(F.concat_ws("|", F.col("trip_id"), F.col("dup_seq").cast("string")), 256)),
+    truoc = (
+        spark.read.format("delta").load(BRONZE_PATH)
+        .where((F.col("nam") == nam) & (F.col("thang") == thang))
+        .count()
     )
+    (
+        DeltaTable.forPath(spark, BRONZE_PATH).alias("t")
+        .merge(df.alias("s"),
+               f"t.nam = {nam} AND t.thang = {thang} AND t.ma_chuyen = s.ma_chuyen")
+        .whenNotMatchedInsertAll()
+        .execute()
+    )
+    sau = (
+        spark.read.format("delta").load(BRONZE_PATH)
+        .where((F.col("nam") == nam) & (F.col("thang") == thang))
+        .count()
+    )
+    return sau - truoc
 
 
 def main():
-    args = parse_args()
-    year, month = args.nam, args.thang
-    file_name = f"yellow_tripdata_{year}-{month:02d}.parquet"
-    source_path = f"{RAW_DIR}/{file_name}"
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--nam", type=int, required=True)
+    ap.add_argument("--thang", type=int, required=True)
+    ap.add_argument("--merge-schema", action="store_true",
+                     help="Bat autoMerge schema khi MERGE vao bronze (DAG 1 dung khi schema thang moi khac chuan)")
+    a = ap.parse_args()
 
-    spark = build_spark(year, month)
-    exit_code = 0
-    df = None
-
+    spark = (
+        SparkSession.builder.appName(f"nap_thang_{a.nam}_{a.thang:02d}")
+        .config("spark.sql.extensions", "io.delta.sql.DeltaSparkSessionExtension")
+        .config("spark.sql.catalog.spark_catalog", "org.apache.spark.sql.delta.catalog.DeltaCatalog")
+        # QUAN TRONG (phat hien qua chay that): AQE (coalescePartitions, mac dinh BAT) tu dong
+        # gop lai cac partition sau shuffle, VO HIEU HOA .repartition(8) o nap_thang() -- khien
+        # MERGE insert-only van don ve 1 task ghi duy nhat, cuc cham (~0,3MB/s quan sat duoc tren
+        # ~3 trieu dong/thang). Tat rieng coalescePartitions cho job nay de ep dung du 8 task
+        # ghi song song nhu da repartition.
+        .config("spark.sql.adaptive.coalescePartitions.enabled", "false")
+        .getOrCreate()
+    )
     try:
-        if not path_exists(spark, source_path):
-            print(f"[LOI] Không thấy file nguồn: {source_path}")
-            return 1
+        df_tho = doc_parquet_thang(spark, a.nam, a.thang)
+        df, so_dong_nguon, so_dong_sau_dedup = nap_thang(spark, df_tho, a.nam, a.thang)
+        so_dong_chen_moi = ghi_bronze(spark, df, a.nam, a.thang, merge_schema=a.merge_schema)
 
-        print(f"[INFO] Đọc {source_path}")
-        df = (
-            add_trip_id(normalize_types(spark.read.parquet(source_path)))
-            # nam/thang lấy từ tham số, không lấy từ ngày đón: file TLC thường lẫn
-            # vài dòng có ngày nằm ngoài tháng, lấy từ dữ liệu sẽ làm sai partition
-            .withColumn("nam", F.lit(year).cast("int"))
-            .withColumn("thang", F.lit(month).cast("int"))
-            .withColumn("source_file", F.lit(file_name))
-            .withColumn("ingested_at", F.current_timestamp())
-            .persist(StorageLevel.MEMORY_AND_DISK)
-        )
-
-        source_count = df.count()
-        repeated_rows = df.filter(F.col("dup_seq") > 1).count()
-        dup_groups = df.groupBy("trip_id").count().filter("count > 1").count()
-        print(f"[INFO] Số dòng nguồn: {source_count:,} | dòng lặp hoàn toàn (dup_seq > 1): "
-              f"{repeated_rows:,} | nhóm trùng trip_id: {dup_groups:,}")
-
-        if dup_groups > 0:
-            print("[LOI] Vẫn còn trip_id trùng sau khi đánh dup_seq, dừng để không ghi dữ liệu sai.")
-            return 1
-
-        version_before = None
-        if not path_exists(spark, BRONZE_PATH + "/_delta_log"):
-            print(f"[INFO] Bảng bronze chưa tồn tại, tạo mới tại {BRONZE_PATH}")
-            (df.write.format("delta")
-               .partitionBy("nam", "thang")
-               .save(BRONZE_PATH))
-        else:
-            print("[INFO] MERGE INTO bronze.chuyen_di (chỉ chèn dòng chưa có)")
-            version_before = latest_history(spark)["version"]
-            df.createOrReplaceTempView("source_month")
-            spark.sql(f"""
-                MERGE INTO delta.`{BRONZE_PATH}` AS t
-                USING source_month AS s
-                ON  t.nam = s.nam AND t.thang = s.thang AND t.trip_id = s.trip_id
-                WHEN NOT MATCHED THEN INSERT *
-            """)
-
-        # Chỉ số của lần ghi vừa rồi (best-effort, không ảnh hưởng kết quả nạp)
-        try:
-            last = latest_history(spark)
-            if version_before is not None and last["version"] == version_before:
-                # MERGE không có dòng nào để chèn nên Delta không tạo commit mới
-                print(f"[INFO] MERGE không chèn dòng nào, bảng giữ nguyên version {last['version']}")
-            else:
-                print(f"[INFO] {last['operation']} (version {last['version']}): "
-                      f"{dict(last['operationMetrics'])}")
-        except Exception as exc:  # noqa: BLE001
-            print(f"[CANH BAO] Không đọc được lịch sử Delta: {exc}")
-
-        table_count = (
-            spark.read.format("delta").load(BRONZE_PATH)
-            .filter((F.col("nam") == year) & (F.col("thang") == month))
-            .count()
-        )
-        print(f"[INFO] Số dòng trong bảng cho {year}-{month:02d}: {table_count:,}")
-
-        if table_count != source_count:
-            print(f"[LOI] Lệch số dòng: nguồn {source_count:,} vs bảng {table_count:,}")
-            exit_code = 1
-        else:
-            print(f"[OK] {year}-{month:02d} đã nạp xong, số dòng khớp.")
+        ket_qua = {
+            "nam": a.nam, "thang": a.thang,
+            "so_dong_nguon": so_dong_nguon,
+            "so_dong_sau_dedup": so_dong_sau_dedup,
+            "so_dong_trung_trong_file": so_dong_nguon - so_dong_sau_dedup,
+            "so_dong_chen_moi_vao_bronze": so_dong_chen_moi,
+        }
+        print("[KET_QUA]", ket_qua)
     finally:
-        if df is not None:
-            df.unpersist()
         spark.stop()
-
-    return exit_code
 
 
 if __name__ == "__main__":
-    sys.exit(main())
+    main()

@@ -1,217 +1,209 @@
 """
-spark_jobs/ml/tao_dac_trung.py
+Functions/tao_dac_trung.py - sinh features.dac_trung_nhu_cau tu gold.nhu_cau_theo_vung_gio
+(sau khi da va KNN - xem va_knn_nhu_cau.py), du 7 nhom dac trung theo de cuong muc 4.4:
 
-Sinh features.dac_trung_nhu_cau tu gold.nhu_cau_theo_vung_gio + du lieu ngoai
-(ma tran ke tu shapefile, thoi tiet Open-Meteo, lich le My, loai vung).
+    Tre (lag)   : lag_1h, lag_2h, lag_24h, lag_168h (cung gio tuan truoc)
+    Truot       : trung binh/do lech chuan cua so 3h, 24h, 168h
+    Khong gian  : tong nhu cau cac vung ke (ma_tran_ke.csv) O GIO TRUOC
+    Thoi gian   : gio, thu, thang, la_cuoi_tuan, la_ngay_le, la_gio_cao_diem
+    Chu ky      : sin/cos cua gio va thu
+    Thoi tiet   : nhiet_do, luong_mua, toc_do_gio tai khung_gio
+    Vung        : loai_vung (san_bay/trung_tam/dan_cu -- suy tu taxi_zone_lookup.csv)
 
-Giong tao_ma_tran_od.py, KHONG chay theo --nam/--thang: lag_168h va cua so truot
-168h can nhin lai 7 ngay truoc, neu chay rieng tung thang thi 7 ngay dau moi thang
-se thieu du lieu thang truoc de tinh dung -- phai tinh tren toan bo lich su lien
-mach 1 lan, ghi de toan bo bang moi lan chay (dung nhu tao_ma_tran_od.py).
+Tat ca cua so Window deu dung lag(,N) hoac rowsBetween(-N,-1) -- CHI lay du lieu TRUOC thoi
+diem du bao, tranh data leakage (gia tri so_chuyen tai chinh khung_gio khong duoc dua vao
+dac trung cua chinh no). dac_trung "khong gian" cung dung lag_1h (khong phai so_chuyen hien
+tai) cua vung ke, cung vi ly do nay.
 
-Cac cua so truot (rolling) dung rowsBetween(-N, -1) -- KHONG bao gom gio hien tai,
-de tranh data leakage (dung chinh so_chuyen dang du bao de tinh dac trung dau vao).
+Luu y voi du lieu khong lien tuc (vd 2 thang rieng le khi test): Window theo vung, orderBy
+khung_gio khong biet ve "khoang trong" giua cac thang -- lag_168h gan dau 1 thang se vo tinh
+tham chieu sang cuoi thang truoc do trong du lieu da nap (du no cach xa ve thoi gian that).
+Day la dac diem von co cua cua so Spark (sap theo thu tu, khong theo khoang cach thoi gian
+that), khong phai loi -- se tu dong dung voi du lieu that lien tuc 24 thang.
 
-Cach chay (tren hadoop-master, KHONG can --nam/--thang):
-    spark-submit --master yarn spark_jobs/ml/tao_dac_trung.py
+    from tao_dac_trung import tao_dac_trung
+    df_dac_trung = tao_dac_trung(spark, df_gold)
+
+    # hoac chay doc lap (doc toan bo gold, ghi de toan bo features):
+    spark-submit tao_dac_trung.py
 """
+import math
 import sys
 
 from pyspark.sql import SparkSession, Window
 from pyspark.sql import functions as F
 
-NHUCAU_PATH = "hdfs://hadoop-master:9000/lakehouse/bd04_giao_thong/gold/nhu_cau_theo_vung_gio"
+from ghep_thoi_tiet_spark import _doc_thoi_tiet_theo_gio
+
+GOLD_PATH = "hdfs://hadoop-master:9000/lakehouse/bd04_giao_thong/gold/nhu_cau_theo_vung_gio"
 FEATURES_PATH = "hdfs://hadoop-master:9000/lakehouse/bd04_giao_thong/features/dac_trung_nhu_cau"
-MATRANKE_PATH = "hdfs://hadoop-master:9000/data/raw/tlc/lookup/ma_tran_ke.csv"
-THOITIET_PATH = "hdfs://hadoop-master:9000/data/raw/tlc/lookup/thoi_tiet.csv"
-LICHLE_PATH = "hdfs://hadoop-master:9000/data/raw/tlc/lookup/lich_le_my.csv"
-LOOKUP_PATH = "hdfs://hadoop-master:9000/data/raw/tlc/lookup/taxi_zone_lookup.csv"
+MA_TRAN_KE_PATH = "hdfs://hadoop-master:9000/data/raw/tlc/lookup/ma_tran_ke.csv"
+TAXI_ZONE_PATH = "hdfs://hadoop-master:9000/data/raw/tlc/lookup/taxi_zone_lookup.csv"
+LICH_LE_PATH = "hdfs://hadoop-master:9000/data/raw/tlc/lookup/lich_le_my.csv"
 
-# Do tu du lieu that (top 25% gio co so_chuyen trung binh cao nhat, toan bo 2022-2025):
-# 18,17,19,15,16,14 -- co dinh cung, khong tinh dong moi lan chay de dac trung on dinh
-GIO_CAO_DIEM = {14, 15, 16, 17, 18, 19}
-
-# service_zone (tu taxi_zone_lookup.csv) -> loai_vung
-LOAI_VUNG_MAP = {
-    "Airports": "san_bay",
-    "EWR": "san_bay",
-    "Yellow Zone": "trung_tam",
-    "Boro Zone": "dan_cu",
-    "N/A": "khong_xac_dinh",
-}
+SO_GIO_CAO_DIEM = 6  # top 6 gio/24 co trung binh so_chuyen cao nhat toan thanh pho -> gio cao diem
 
 
-def build_spark():
+def _doc_thoi_tiet(spark):
+    """Dung lai ham chung trong ghep_thoi_tiet_spark.py (nhiet_do, luong_mua, toc_do_gio,
+    da gop san cac dong khung_gio trung do gio mo ho lui gio thang 11) -- chi giu lai 3 cot
+    thoi tiet, bo la_ngay_le/ten_ngay_le vi tao_dac_trung.py tu xu ly rieng (_doc_ngay_le)."""
+    return _doc_thoi_tiet_theo_gio(spark).select("khung_gio", "nhiet_do", "luong_mua", "toc_do_gio")
+
+
+def _doc_ngay_le(spark):
     return (
-        SparkSession.builder
-        .appName("tao_dac_trung")
-        .config("spark.sql.extensions", "io.delta.sql.DeltaSparkSessionExtension")
-        .config("spark.sql.catalog.spark_catalog", "org.apache.spark.sql.delta.catalog.DeltaCatalog")
-        .getOrCreate()
+        spark.read.option("header", True).option("inferSchema", True).csv(LICH_LE_PATH)
+        .withColumn("ngay", F.to_date("ngay"))
+        .select("ngay")
+        .withColumn("la_ngay_le", F.lit(True))
     )
 
 
-def path_exists(spark, path):
-    jvm_path = spark._jvm.org.apache.hadoop.fs.Path(path)
-    fs = jvm_path.getFileSystem(spark._jsc.hadoopConfiguration())
-    return fs.exists(jvm_path)
-
-
-def them_dac_trung_tre_va_truot(nhu_cau):
-    """lag_1h/2h/24h/168h + trung binh/do lech chuan truot 3h/24h/168h.
-    Cua so truot dung rowsBetween(-N,-1): KHONG tinh gio hien tai, tranh leakage."""
-    w_thu_tu = Window.partitionBy("vung").orderBy("khung_gio")
-    w_3h = w_thu_tu.rowsBetween(-3, -1)
-    w_24h = w_thu_tu.rowsBetween(-24, -1)
-    w_168h = w_thu_tu.rowsBetween(-168, -1)
-
+def _doc_loai_vung(spark):
+    """Suy loai vung tu bang lookup goc (de cuong khong dinh nghia luat cu the):
+    san_bay = Zone chua 'Airport' hoac service_zone la EWR/Airports;
+    trung_tam = service_zone = 'Yellow Zone' (Manhattan loi);
+    dan_cu = con lai (Boro Zone)."""
+    lookup = spark.read.option("header", True).option("quote", '"').csv(TAXI_ZONE_PATH)
     return (
-        nhu_cau
-        .withColumn("lag_1h", F.lag("so_chuyen", 1).over(w_thu_tu))
-        .withColumn("lag_2h", F.lag("so_chuyen", 2).over(w_thu_tu))
-        .withColumn("lag_24h", F.lag("so_chuyen", 24).over(w_thu_tu))
-        .withColumn("lag_168h", F.lag("so_chuyen", 168).over(w_thu_tu))
-        .withColumn("trungbinh_truot_3h", F.avg("so_chuyen").over(w_3h))
-        .withColumn("dolech_truot_3h", F.stddev("so_chuyen").over(w_3h))
-        .withColumn("trungbinh_truot_24h", F.avg("so_chuyen").over(w_24h))
-        .withColumn("dolech_truot_24h", F.stddev("so_chuyen").over(w_24h))
-        .withColumn("trungbinh_truot_168h", F.avg("so_chuyen").over(w_168h))
-        .withColumn("dolech_truot_168h", F.stddev("so_chuyen").over(w_168h))
+        lookup
+        .withColumn("vung", F.col("LocationID").cast("int"))
+        .withColumn(
+            "loai_vung",
+            F.when(
+                F.lower(F.col("Zone")).contains("airport") | F.col("service_zone").isin("EWR", "Airports"),
+                F.lit("san_bay"),
+            )
+            .when(F.col("service_zone") == "Yellow Zone", F.lit("trung_tam"))
+            .otherwise(F.lit("dan_cu")),
+        )
+        .select("vung", "loai_vung")
     )
 
 
-def them_dac_trung_khong_gian(spark, df):
-    """tong_nhu_cau_vung_ke_gio_truoc: tong so_chuyen cua cac vung ke tai gio truoc."""
-    ma_tran_ke = spark.read.option("header", True).csv(MATRANKE_PATH) \
-        .withColumn("vung", F.col("vung").cast("int")) \
-        .withColumn("vung_ke", F.col("vung_ke").cast("int"))
-
-    # Dich khung_gio cua vung nguon toi +1h: so_chuyen tai gio T cua vung_ke se
-    # duoc cong vao dac trung cua vung dich tai khung_gio = T + 1h ("gio truoc")
-    nguon_dich_1h = df.select(
-        F.col("vung").alias("vung_nguon"),
-        (F.col("khung_gio") + F.expr("INTERVAL 1 HOUR")).alias("khung_gio_dich"),
-        F.col("so_chuyen").alias("so_chuyen_nguon"),
+def _dac_trung_tre_truot(df):
+    cua_so = Window.partitionBy("vung").orderBy("khung_gio")
+    df = (
+        df
+        .withColumn("lag_1h", F.lag("so_chuyen", 1).over(cua_so))
+        .withColumn("lag_2h", F.lag("so_chuyen", 2).over(cua_so))
+        .withColumn("lag_24h", F.lag("so_chuyen", 24).over(cua_so))
+        .withColumn("lag_168h", F.lag("so_chuyen", 168).over(cua_so))
     )
+    for so_gio, ten in [(3, "3h"), (24, "24h"), (168, "168h")]:
+        cua_so_truot = Window.partitionBy("vung").orderBy("khung_gio").rowsBetween(-so_gio, -1)
+        df = (
+            df
+            .withColumn(f"trung_binh_truot_{ten}", F.avg("so_chuyen").over(cua_so_truot))
+            .withColumn(f"do_lech_chuan_truot_{ten}", F.stddev("so_chuyen").over(cua_so_truot))
+        )
+    return df
 
-    tong_hang_xom = (
-        ma_tran_ke.join(nguon_dich_1h, ma_tran_ke.vung_ke == nguon_dich_1h.vung_nguon)
-        .groupBy(ma_tran_ke.vung.alias("vung"), "khung_gio_dich")
-        .agg(F.sum("so_chuyen_nguon").alias("tong_nhu_cau_vung_ke_gio_truoc"))
-        .withColumnRenamed("khung_gio_dich", "khung_gio")
+
+def _dac_trung_khong_gian(df, ma_tran_ke):
+    """Tong nhu cau cac vung ke O GIO TRUOC = tong lag_1h (khong phai so_chuyen hien tai)
+    cua cac vung ke -- tranh leak thong tin cung khung_gio dang du bao."""
+    nhu_cau_lag1 = df.select(
+        F.col("vung").alias("_vung_ke_nguon"), "khung_gio", F.col("lag_1h").alias("_so_chuyen_vung_ke"),
     )
-
-    return (
-        df.join(tong_hang_xom, on=["vung", "khung_gio"], how="left")
-        # khong co du lieu hang xom (vung co lap, hoac gio dau tien) -> that su la 0,
-        # khac voi cac cot trung binh o tao_nhu_cau.py (0 chuyen la gia tri that, khong phai thieu du lieu)
-        .withColumn("tong_nhu_cau_vung_ke_gio_truoc",
-                    F.coalesce(F.col("tong_nhu_cau_vung_ke_gio_truoc"), F.lit(0.0)))
+    lang_gieng = (
+        ma_tran_ke
+        .join(nhu_cau_lag1, ma_tran_ke["vung_ke"] == nhu_cau_lag1["_vung_ke_nguon"])
+        .groupBy("vung", "khung_gio")
+        .agg(F.sum("_so_chuyen_vung_ke").alias("nhu_cau_vung_ke_gio_truoc"))
     )
+    return df.join(lang_gieng, on=["vung", "khung_gio"], how="left")
 
 
-def them_dac_trung_thoi_gian(spark, df):
-    lich_le = spark.read.option("header", True).csv(LICHLE_PATH) \
-        .withColumn("ngay", F.col("ngay").cast("date")) \
-        .select("ngay").distinct()
-
+def _dac_trung_thoi_gian_chu_ky(df, ngay_le):
     df = (
         df
         .withColumn("gio", F.hour("khung_gio"))
-        .withColumn("thu_trong_tuan", F.dayofweek("khung_gio"))  # 1=CN ... 7=T7
+        .withColumn("thu", F.dayofweek("khung_gio"))
         .withColumn("thang", F.month("khung_gio"))
-        .withColumn("la_cuoi_tuan", F.col("thu_trong_tuan").isin(1, 7))
-        .withColumn("la_gio_cao_diem", F.col("gio").isin(*GIO_CAO_DIEM))
-        .withColumn("sin_gio", F.sin(F.col("gio") * 2 * F.lit(3.14159265358979) / 24))
-        .withColumn("cos_gio", F.cos(F.col("gio") * 2 * F.lit(3.14159265358979) / 24))
-        .withColumn("sin_thu", F.sin(F.col("thu_trong_tuan") * 2 * F.lit(3.14159265358979) / 7))
-        .withColumn("cos_thu", F.cos(F.col("thu_trong_tuan") * 2 * F.lit(3.14159265358979) / 7))
-        .withColumn("ngay_cua_khung_gio", F.to_date("khung_gio"))
+        .withColumn("la_cuoi_tuan", F.col("thu").isin(1, 7))
+        .withColumn("_ngay", F.to_date("khung_gio"))
+        .join(ngay_le.withColumnRenamed("ngay", "_ngay"), on="_ngay", how="left")
+        .withColumn("la_ngay_le", F.coalesce(F.col("la_ngay_le"), F.lit(False)))
+        .drop("_ngay")
+        .withColumn("sin_gio", F.sin(2 * math.pi * F.col("gio") / 24))
+        .withColumn("cos_gio", F.cos(2 * math.pi * F.col("gio") / 24))
+        .withColumn("sin_thu", F.sin(2 * math.pi * F.col("thu") / 7))
+        .withColumn("cos_thu", F.cos(2 * math.pi * F.col("thu") / 7))
     )
 
+    # Gio cao diem: tinh tu du lieu that (khong gia dinh san) -- top SO_GIO_CAO_DIEM gio/24
+    # co trung binh so_chuyen toan thanh pho cao nhat.
+    tb_theo_gio = (
+        df.groupBy("gio").agg(F.avg("so_chuyen").alias("_tb_so_chuyen"))
+        .orderBy(F.desc("_tb_so_chuyen"))
+        .limit(SO_GIO_CAO_DIEM)
+        .select("gio")
+        .withColumn("la_gio_cao_diem", F.lit(True))
+    )
     df = (
-        df.join(lich_le, df.ngay_cua_khung_gio == lich_le.ngay, how="left")
-        .withColumn("la_ngay_le", F.col("ngay").isNotNull())
-        .drop("ngay", "ngay_cua_khung_gio")
+        df.join(tb_theo_gio, on="gio", how="left")
+        .withColumn("la_gio_cao_diem", F.coalesce(F.col("la_gio_cao_diem"), F.lit(False)))
     )
     return df
 
 
-def them_dac_trung_thoi_tiet(spark, df):
-    thoi_tiet = (
-        spark.read.option("header", True).csv(THOITIET_PATH)
-        .withColumn("khung_gio", F.to_timestamp("khung_gio", "yyyy-MM-dd'T'HH:mm"))
-        .withColumn("nhiet_do", F.col("nhiet_do").cast("double"))
-        .withColumn("luong_mua", F.col("luong_mua").cast("double"))
-        .withColumn("toc_do_gio", F.col("toc_do_gio").cast("double"))
-    )
-    return df.join(thoi_tiet, on="khung_gio", how="left")
+def tao_dac_trung(spark, df_gold):
+    ma_tran_ke = spark.read.option("header", True).option("inferSchema", True).csv(MA_TRAN_KE_PATH)
+    thoi_tiet = _doc_thoi_tiet(spark)
+    ngay_le = _doc_ngay_le(spark)
+    loai_vung = _doc_loai_vung(spark)
 
-
-def them_dac_trung_vung(spark, df):
-    lookup = spark.read.option("header", True).option("quote", '"').csv(LOOKUP_PATH) \
-        .withColumn("LocationID", F.col("LocationID").cast("int"))
-
-    mapping = F.create_map(*[x for k, v in LOAI_VUNG_MAP.items() for x in (F.lit(k), F.lit(v))])
-    lookup = lookup.withColumn(
-        "loai_vung", F.coalesce(mapping[F.col("service_zone")], F.lit("khong_xac_dinh"))
-    ).select(F.col("LocationID").alias("vung"), "loai_vung")
-
-    return df.join(lookup, on="vung", how="left")
+    df = _dac_trung_tre_truot(df_gold)
+    df = _dac_trung_khong_gian(df, ma_tran_ke)
+    df = _dac_trung_thoi_gian_chu_ky(df, ngay_le)
+    df = df.join(thoi_tiet, on="khung_gio", how="left")
+    df = df.join(loai_vung, on="vung", how="left")
+    return df
 
 
 def main():
-    spark = build_spark()
-    exit_code = 0
-    df = None
-
+    spark = (
+        SparkSession.builder.appName("tao_dac_trung")
+        .config("spark.sql.extensions", "io.delta.sql.DeltaSparkSessionExtension")
+        .config("spark.sql.catalog.spark_catalog", "org.apache.spark.sql.delta.catalog.DeltaCatalog")
+        .getOrCreate()
+    )
     try:
-        if not path_exists(spark, NHUCAU_PATH + "/_delta_log"):
-            print("[LOI] Chua co gold.nhu_cau_theo_vung_gio, chay tao_nhu_cau.py truoc.")
+        jvm_path = spark._jvm.org.apache.hadoop.fs.Path(GOLD_PATH + "/_delta_log")
+        fs = jvm_path.getFileSystem(spark._jsc.hadoopConfiguration())
+        if not fs.exists(jvm_path):
+            print("[LOI] Chua co gold.nhu_cau_theo_vung_gio, chay tao_nhu_cau_vung_gio.py truoc.")
             return 1
 
-        print("[INFO] Doc toan bo gold.nhu_cau_theo_vung_gio")
-        nhu_cau = spark.read.format("delta").load(NHUCAU_PATH)
-        so_dong_nguon = nhu_cau.count()
-        print(f"[INFO] So dong nguon: {so_dong_nguon:,}")
+        df_gold = spark.read.format("delta").load(GOLD_PATH)
+        so_dong_nguon = df_gold.count()
 
-        print("[INFO] Tinh dac trung tre/truot (window functions)")
-        df = them_dac_trung_tre_va_truot(nhu_cau)
+        df_dac_trung = tao_dac_trung(spark, df_gold)
+        so_dong_ra = df_dac_trung.count()
 
-        print("[INFO] Tinh dac trung khong gian (join ma tran ke)")
-        df = them_dac_trung_khong_gian(spark, df)
-
-        print("[INFO] Tinh dac trung thoi gian (+ join lich le)")
-        df = them_dac_trung_thoi_gian(spark, df)
-
-        print("[INFO] Join thoi tiet")
-        df = them_dac_trung_thoi_tiet(spark, df)
-
-        print("[INFO] Join loai vung")
-        df = them_dac_trung_vung(spark, df).cache()
-
-        so_dong_ket_qua = df.count()
-        print(f"[INFO] So dong sau khi them dac trung: {so_dong_ket_qua:,}")
-        if so_dong_ket_qua != so_dong_nguon:
-            print(f"[LOI] Lech so dong: nguon {so_dong_nguon:,} vs ket qua {so_dong_ket_qua:,}")
-            return 1
-
-        print(f"[INFO] Ghi de toan bo features.dac_trung_nhu_cau tai {FEATURES_PATH}")
-        df.write.format("delta").mode("overwrite").save(FEATURES_PATH)
+        df_dac_trung.write.format("delta").mode("overwrite").option("overwriteSchema", "true").save(FEATURES_PATH)
 
         gold_count = spark.read.format("delta").load(FEATURES_PATH).count()
-        print(f"[INFO] So dong sau khi ghi: {gold_count:,}")
-        if gold_count != so_dong_ket_qua:
-            print(f"[LOI] Lech so dong sau ghi: ky vong {so_dong_ket_qua:,} vs {gold_count:,}")
-            exit_code = 1
-        else:
-            print(f"[OK] Da sinh dac_trung_nhu_cau xong, so dong khop ({gold_count:,}).")
-    finally:
-        if df is not None:
-            df.unpersist()
-        spark.stop()
 
-    return exit_code
+        so_dong_co_du_lag168 = df_dac_trung.where(F.col("lag_168h").isNotNull()).count()
+        thong_ke = {
+            "so_dong_nguon": so_dong_nguon,
+            "so_dong_ra": so_dong_ra,
+            "so_dong_trong_features": gold_count,
+            "so_dong_co_du_lag_168h": so_dong_co_du_lag168,
+            "so_cot": len(df_dac_trung.columns),
+        }
+        if gold_count != so_dong_ra or so_dong_ra != so_dong_nguon:
+            print(f"[LOI] Lech so dong: nguon {so_dong_nguon:,} / ra {so_dong_ra:,} / ghi {gold_count:,}")
+            print("[KET_QUA] " + str(thong_ke))
+            return 1
+
+        print("[KET_QUA] " + str(thong_ke))
+        return 0
+    finally:
+        spark.stop()
 
 
 if __name__ == "__main__":
