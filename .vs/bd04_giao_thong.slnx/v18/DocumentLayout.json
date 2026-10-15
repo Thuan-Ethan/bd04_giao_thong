@@ -3,6 +3,42 @@
   "WorkspaceRootPath": "C:\\Users\\Admin\\source\\repos\\Thuan-Ethan\\bd04_giao_thong\\",
   "Documents": [
     {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\Admin\\source\\repos\\Thuan-Ethan\\bd04_giao_thong\\spark_jobs\\ml\\huan_luyen.py||{8B382828-6202-11D1-8870-0000F87579D2}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:spark_jobs\\ml\\huan_luyen.py||{8B382828-6202-11D1-8870-0000F87579D2}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\Admin\\source\\repos\\Thuan-Ethan\\bd04_giao_thong\\spark_jobs\\ml\\xu_ly_va_du_bao.py||{8B382828-6202-11D1-8870-0000F87579D2}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:spark_jobs\\ml\\xu_ly_va_du_bao.py||{8B382828-6202-11D1-8870-0000F87579D2}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\Admin\\source\\repos\\Thuan-Ethan\\bd04_giao_thong\\spark_jobs\\streaming\\nhan_chuyen_streaming.py||{8B382828-6202-11D1-8870-0000F87579D2}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:spark_jobs\\streaming\\nhan_chuyen_streaming.py||{8B382828-6202-11D1-8870-0000F87579D2}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\Admin\\source\\repos\\Thuan-Ethan\\bd04_giao_thong\\spark_jobs\\transform\\va_knn_nhu_cau.py||{8B382828-6202-11D1-8870-0000F87579D2}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:spark_jobs\\transform\\va_knn_nhu_cau.py||{8B382828-6202-11D1-8870-0000F87579D2}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\Admin\\source\\repos\\Thuan-Ethan\\bd04_giao_thong\\spark_jobs\\transform\\va_du_lieu_knn_spark.py||{8B382828-6202-11D1-8870-0000F87579D2}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:spark_jobs\\transform\\va_du_lieu_knn_spark.py||{8B382828-6202-11D1-8870-0000F87579D2}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\Admin\\source\\repos\\Thuan-Ethan\\bd04_giao_thong\\spark_jobs\\transform\\tao_nhu_cau_vung_gio.py||{8B382828-6202-11D1-8870-0000F87579D2}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:spark_jobs\\transform\\tao_nhu_cau_vung_gio.py||{8B382828-6202-11D1-8870-0000F87579D2}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\Admin\\source\\repos\\Thuan-Ethan\\bd04_giao_thong\\spark_jobs\\transform\\tao_ma_tran_od.py||{8B382828-6202-11D1-8870-0000F87579D2}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:spark_jobs\\transform\\tao_ma_tran_od.py||{8B382828-6202-11D1-8870-0000F87579D2}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\Admin\\source\\repos\\Thuan-Ethan\\bd04_giao_thong\\spark_jobs\\transform\\lam_sach_silver.py||{8B382828-6202-11D1-8870-0000F87579D2}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:spark_jobs\\transform\\lam_sach_silver.py||{8B382828-6202-11D1-8870-0000F87579D2}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\Admin\\source\\repos\\Thuan-Ethan\\bd04_giao_thong\\webapp\\backend\\doc_du_lieu.py||{8B382828-6202-11D1-8870-0000F87579D2}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:webapp\\backend\\doc_du_lieu.py||{8B382828-6202-11D1-8870-0000F87579D2}"
+    },
+    {
       "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\Admin\\source\\repos\\Thuan-Ethan\\bd04_giao_thong\\spark_jobs\\ingest\\nap_thang.py||{8B382828-6202-11D1-8870-0000F87579D2}",
       "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:spark_jobs\\ingest\\nap_thang.py||{8B382828-6202-11D1-8870-0000F87579D2}"
     },
@@ -23,20 +59,12 @@
       "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:webapp\\frontend\\app.js||{3B902123-F8A7-4915-9F01-361F908088D0}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\Admin\\source\\repos\\Thuan-Ethan\\bd04_giao_thong\\webapp\\backend\\doc_du_lieu.py||{8B382828-6202-11D1-8870-0000F87579D2}",
-      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:webapp\\backend\\doc_du_lieu.py||{8B382828-6202-11D1-8870-0000F87579D2}"
-    },
-    {
       "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\Admin\\source\\repos\\Thuan-Ethan\\bd04_giao_thong\\spark_jobs\\ingest\\kiem_tra_schema.py||{8B382828-6202-11D1-8870-0000F87579D2}",
       "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:spark_jobs\\ingest\\kiem_tra_schema.py||{8B382828-6202-11D1-8870-0000F87579D2}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\Admin\\source\\repos\\Thuan-Ethan\\bd04_giao_thong\\spark_jobs\\ingest\\lay_thoi_tiet.py||{8B382828-6202-11D1-8870-0000F87579D2}",
       "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:spark_jobs\\ingest\\lay_thoi_tiet.py||{8B382828-6202-11D1-8870-0000F87579D2}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\Admin\\source\\repos\\Thuan-Ethan\\bd04_giao_thong\\spark_jobs\\transform\\tao_ma_tran_od.py||{8B382828-6202-11D1-8870-0000F87579D2}",
-      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:spark_jobs\\transform\\tao_ma_tran_od.py||{8B382828-6202-11D1-8870-0000F87579D2}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\Admin\\source\\repos\\Thuan-Ethan\\bd04_giao_thong\\conf\\spark-defaults.conf||{3B902123-F8A7-4915-9F01-361F908088D0}",
@@ -53,14 +81,6 @@
     {
       "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\Admin\\source\\repos\\Thuan-Ethan\\bd04_giao_thong\\spark_jobs\\transform\\.gitkeep||{8B382828-6202-11D1-8870-0000F87579D2}",
       "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:spark_jobs\\transform\\.gitkeep||{8B382828-6202-11D1-8870-0000F87579D2}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\Admin\\source\\repos\\Thuan-Ethan\\bd04_giao_thong\\spark_jobs\\transform\\tao_nhu_cau.py||{8B382828-6202-11D1-8870-0000F87579D2}",
-      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:spark_jobs\\transform\\tao_nhu_cau.py||{8B382828-6202-11D1-8870-0000F87579D2}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\Admin\\source\\repos\\Thuan-Ethan\\bd04_giao_thong\\spark_jobs\\transform\\bronze_to_silver.py||{8B382828-6202-11D1-8870-0000F87579D2}",
-      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:spark_jobs\\transform\\bronze_to_silver.py||{8B382828-6202-11D1-8870-0000F87579D2}"
     }
   ],
   "DocumentGroupContainers": [
@@ -70,11 +90,102 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 14,
+          "SelectedChildIndex": 0,
           "Children": [
             {
               "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "huan_luyen.py",
+              "DocumentMoniker": "C:\\Users\\Admin\\source\\repos\\Thuan-Ethan\\bd04_giao_thong\\spark_jobs\\ml\\huan_luyen.py",
+              "RelativeDocumentMoniker": "spark_jobs\\ml\\huan_luyen.py",
+              "ToolTip": "C:\\Users\\Admin\\source\\repos\\Thuan-Ethan\\bd04_giao_thong\\spark_jobs\\ml\\huan_luyen.py",
+              "RelativeToolTip": "spark_jobs\\ml\\huan_luyen.py",
+              "ViewState": "AgIAAH4AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.002457|",
+              "WhenOpened": "2026-10-13T13:19:08.661Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
               "DocumentIndex": 1,
+              "Title": "xu_ly_va_du_bao.py",
+              "DocumentMoniker": "C:\\Users\\Admin\\source\\repos\\Thuan-Ethan\\bd04_giao_thong\\spark_jobs\\ml\\xu_ly_va_du_bao.py",
+              "RelativeDocumentMoniker": "spark_jobs\\ml\\xu_ly_va_du_bao.py",
+              "ToolTip": "C:\\Users\\Admin\\source\\repos\\Thuan-Ethan\\bd04_giao_thong\\spark_jobs\\ml\\xu_ly_va_du_bao.py",
+              "RelativeToolTip": "spark_jobs\\ml\\xu_ly_va_du_bao.py",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.002457|",
+              "WhenOpened": "2026-10-13T13:19:07.059Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "nhan_chuyen_streaming.py",
+              "DocumentMoniker": "C:\\Users\\Admin\\source\\repos\\Thuan-Ethan\\bd04_giao_thong\\spark_jobs\\streaming\\nhan_chuyen_streaming.py",
+              "RelativeDocumentMoniker": "spark_jobs\\streaming\\nhan_chuyen_streaming.py",
+              "ToolTip": "C:\\Users\\Admin\\source\\repos\\Thuan-Ethan\\bd04_giao_thong\\spark_jobs\\streaming\\nhan_chuyen_streaming.py",
+              "RelativeToolTip": "spark_jobs\\streaming\\nhan_chuyen_streaming.py",
+              "ViewState": "AgIAAEgAAAAAAAAAAAAAAE4AAAAwAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.002457|",
+              "WhenOpened": "2026-10-13T13:18:30.51Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "va_knn_nhu_cau.py",
+              "DocumentMoniker": "C:\\Users\\Admin\\source\\repos\\Thuan-Ethan\\bd04_giao_thong\\spark_jobs\\transform\\va_knn_nhu_cau.py",
+              "RelativeDocumentMoniker": "spark_jobs\\transform\\va_knn_nhu_cau.py",
+              "ToolTip": "C:\\Users\\Admin\\source\\repos\\Thuan-Ethan\\bd04_giao_thong\\spark_jobs\\transform\\va_knn_nhu_cau.py",
+              "RelativeToolTip": "spark_jobs\\transform\\va_knn_nhu_cau.py",
+              "ViewState": "AgIAAG8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.002457|",
+              "WhenOpened": "2026-10-13T13:18:17.205Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 4,
+              "Title": "va_du_lieu_knn_spark.py",
+              "DocumentMoniker": "C:\\Users\\Admin\\source\\repos\\Thuan-Ethan\\bd04_giao_thong\\spark_jobs\\transform\\va_du_lieu_knn_spark.py",
+              "RelativeDocumentMoniker": "spark_jobs\\transform\\va_du_lieu_knn_spark.py",
+              "ToolTip": "C:\\Users\\Admin\\source\\repos\\Thuan-Ethan\\bd04_giao_thong\\spark_jobs\\transform\\va_du_lieu_knn_spark.py",
+              "RelativeToolTip": "spark_jobs\\transform\\va_du_lieu_knn_spark.py",
+              "ViewState": "AgIAAGYAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.002457|",
+              "WhenOpened": "2026-10-13T13:18:11.05Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 7,
+              "Title": "lam_sach_silver.py",
+              "DocumentMoniker": "C:\\Users\\Admin\\source\\repos\\Thuan-Ethan\\bd04_giao_thong\\spark_jobs\\transform\\lam_sach_silver.py",
+              "RelativeDocumentMoniker": "spark_jobs\\transform\\lam_sach_silver.py",
+              "ToolTip": "C:\\Users\\Admin\\source\\repos\\Thuan-Ethan\\bd04_giao_thong\\spark_jobs\\transform\\lam_sach_silver.py",
+              "RelativeToolTip": "spark_jobs\\transform\\lam_sach_silver.py",
+              "ViewState": "AgIAANUAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.002457|",
+              "WhenOpened": "2026-10-13T13:17:38.403Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 5,
+              "Title": "tao_nhu_cau_vung_gio.py",
+              "DocumentMoniker": "C:\\Users\\Admin\\source\\repos\\Thuan-Ethan\\bd04_giao_thong\\spark_jobs\\transform\\tao_nhu_cau_vung_gio.py",
+              "RelativeDocumentMoniker": "spark_jobs\\transform\\tao_nhu_cau_vung_gio.py",
+              "ToolTip": "C:\\Users\\Admin\\source\\repos\\Thuan-Ethan\\bd04_giao_thong\\spark_jobs\\transform\\tao_nhu_cau_vung_gio.py",
+              "RelativeToolTip": "spark_jobs\\transform\\tao_nhu_cau_vung_gio.py",
+              "ViewState": "AgIAAGwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.002457|",
+              "WhenOpened": "2026-10-13T12:41:54.568Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 10,
               "Title": "style.css",
               "DocumentMoniker": "C:\\Users\\Admin\\source\\repos\\Thuan-Ethan\\bd04_giao_thong\\webapp\\frontend\\style.css",
               "RelativeDocumentMoniker": "webapp\\frontend\\style.css",
@@ -87,7 +198,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 3,
+              "DocumentIndex": 12,
               "Title": "index.html",
               "DocumentMoniker": "C:\\Users\\Admin\\source\\repos\\Thuan-Ethan\\bd04_giao_thong\\webapp\\frontend\\index.html",
               "RelativeDocumentMoniker": "webapp\\frontend\\index.html",
@@ -100,7 +211,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 4,
+              "DocumentIndex": 13,
               "Title": "app.js",
               "DocumentMoniker": "C:\\Users\\Admin\\source\\repos\\Thuan-Ethan\\bd04_giao_thong\\webapp\\frontend\\app.js",
               "RelativeDocumentMoniker": "webapp\\frontend\\app.js",
@@ -113,20 +224,20 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 5,
+              "DocumentIndex": 8,
               "Title": "doc_du_lieu.py",
               "DocumentMoniker": "C:\\Users\\Admin\\source\\repos\\Thuan-Ethan\\bd04_giao_thong\\webapp\\backend\\doc_du_lieu.py",
               "RelativeDocumentMoniker": "webapp\\backend\\doc_du_lieu.py",
               "ToolTip": "C:\\Users\\Admin\\source\\repos\\Thuan-Ethan\\bd04_giao_thong\\webapp\\backend\\doc_du_lieu.py",
               "RelativeToolTip": "webapp\\backend\\doc_du_lieu.py",
-              "ViewState": "AgIAALsAAAAAAAAAAAAAABsAAAAoAAAAAAAAAA==",
+              "ViewState": "AgIAAKwAAAAAAAAAAAAowLUAAABFAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.002457|",
               "WhenOpened": "2026-10-13T02:27:15.126Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 6,
+              "DocumentIndex": 14,
               "Title": "kiem_tra_schema.py",
               "DocumentMoniker": "C:\\Users\\Admin\\source\\repos\\Thuan-Ethan\\bd04_giao_thong\\spark_jobs\\ingest\\kiem_tra_schema.py",
               "RelativeDocumentMoniker": "spark_jobs\\ingest\\kiem_tra_schema.py",
@@ -134,12 +245,11 @@
               "RelativeToolTip": "spark_jobs\\ingest\\kiem_tra_schema.py",
               "ViewState": "AgIAADMAAAAAAAAAAAAAAEIAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.002457|",
-              "WhenOpened": "2026-10-13T02:16:43.056Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-10-13T02:16:43.056Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 7,
+              "DocumentIndex": 15,
               "Title": "lay_thoi_tiet.py",
               "DocumentMoniker": "C:\\Users\\Admin\\source\\repos\\Thuan-Ethan\\bd04_giao_thong\\spark_jobs\\ingest\\lay_thoi_tiet.py",
               "RelativeDocumentMoniker": "spark_jobs\\ingest\\lay_thoi_tiet.py",
@@ -147,25 +257,24 @@
               "RelativeToolTip": "spark_jobs\\ingest\\lay_thoi_tiet.py",
               "ViewState": "AgIAAD8AAAAAAAAAAAAAADsAAAA/AAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.002457|",
-              "WhenOpened": "2026-10-13T02:16:20.347Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-10-13T02:16:20.347Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 8,
+              "DocumentIndex": 6,
               "Title": "tao_ma_tran_od.py",
               "DocumentMoniker": "C:\\Users\\Admin\\source\\repos\\Thuan-Ethan\\bd04_giao_thong\\spark_jobs\\transform\\tao_ma_tran_od.py",
               "RelativeDocumentMoniker": "spark_jobs\\transform\\tao_ma_tran_od.py",
               "ToolTip": "C:\\Users\\Admin\\source\\repos\\Thuan-Ethan\\bd04_giao_thong\\spark_jobs\\transform\\tao_ma_tran_od.py",
               "RelativeToolTip": "spark_jobs\\transform\\tao_ma_tran_od.py",
-              "ViewState": "AgIAAA8AAAAAAAAAAAAAACgAAAARAAAAAAAAAA==",
+              "ViewState": "AgIAACQAAAAAAAAAAAAAAB8AAAAPAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.002457|",
               "WhenOpened": "2026-09-25T10:59:27.665Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 11,
+              "DocumentIndex": 18,
               "Title": ".env.example",
               "DocumentMoniker": "C:\\Users\\Admin\\source\\repos\\Thuan-Ethan\\bd04_giao_thong\\conf\\.env.example",
               "RelativeDocumentMoniker": "conf\\.env.example",
@@ -173,12 +282,11 @@
               "RelativeToolTip": "conf\\.env.example",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001001|",
-              "WhenOpened": "2026-09-25T05:45:30.884Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-09-25T05:45:30.884Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 9,
+              "DocumentIndex": 16,
               "Title": "spark-defaults.conf",
               "DocumentMoniker": "C:\\Users\\Admin\\source\\repos\\Thuan-Ethan\\bd04_giao_thong\\conf\\spark-defaults.conf",
               "RelativeDocumentMoniker": "conf\\spark-defaults.conf",
@@ -186,12 +294,11 @@
               "RelativeToolTip": "conf\\spark-defaults.conf",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAgAAAADAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000601|",
-              "WhenOpened": "2026-09-25T05:45:15.223Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-09-25T05:45:15.223Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 10,
+              "DocumentIndex": 17,
               "Title": "hdfs-site.xml",
               "DocumentMoniker": "C:\\Users\\Admin\\source\\repos\\Thuan-Ethan\\bd04_giao_thong\\conf\\hdfs-site.xml",
               "RelativeDocumentMoniker": "conf\\hdfs-site.xml",
@@ -199,12 +306,11 @@
               "RelativeToolTip": "conf\\hdfs-site.xml",
               "ViewState": "AgIAABUAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003576|",
-              "WhenOpened": "2026-09-25T05:45:06.641Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-09-25T05:45:06.641Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 12,
+              "DocumentIndex": 19,
               "Title": ".gitkeep",
               "DocumentMoniker": "C:\\Users\\Admin\\source\\repos\\Thuan-Ethan\\bd04_giao_thong\\spark_jobs\\transform\\.gitkeep",
               "RelativeDocumentMoniker": "spark_jobs\\transform\\.gitkeep",
@@ -212,34 +318,11 @@
               "RelativeToolTip": "spark_jobs\\transform\\.gitkeep",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001407|",
-              "WhenOpened": "2026-09-23T23:51:05.948Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-09-23T23:51:05.948Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 13,
-              "Title": "tao_nhu_cau.py",
-              "DocumentMoniker": "C:\\Users\\Admin\\source\\repos\\Thuan-Ethan\\bd04_giao_thong\\spark_jobs\\transform\\tao_nhu_cau.py",
-              "RelativeDocumentMoniker": "spark_jobs\\transform\\tao_nhu_cau.py",
-              "ToolTip": "C:\\Users\\Admin\\source\\repos\\Thuan-Ethan\\bd04_giao_thong\\spark_jobs\\transform\\tao_nhu_cau.py",
-              "RelativeToolTip": "spark_jobs\\transform\\tao_nhu_cau.py",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.002457|",
-              "WhenOpened": "2026-09-23T23:15:52.076Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 14,
-              "Title": "bronze_to_silver.py",
-              "DocumentMoniker": "C:\\Users\\Admin\\source\\repos\\Thuan-Ethan\\bd04_giao_thong\\spark_jobs\\transform\\bronze_to_silver.py",
-              "RelativeDocumentMoniker": "spark_jobs\\transform\\bronze_to_silver.py",
-              "ToolTip": "C:\\Users\\Admin\\source\\repos\\Thuan-Ethan\\bd04_giao_thong\\spark_jobs\\transform\\bronze_to_silver.py",
-              "RelativeToolTip": "spark_jobs\\transform\\bronze_to_silver.py",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.002457|",
-              "WhenOpened": "2026-09-23T04:09:53.359Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 2,
+              "DocumentIndex": 11,
               "Title": ".gitignore",
               "DocumentMoniker": "C:\\Users\\Admin\\source\\repos\\Thuan-Ethan\\bd04_giao_thong\\.gitignore",
               "RelativeDocumentMoniker": ".gitignore",
@@ -247,12 +330,11 @@
               "RelativeToolTip": ".gitignore",
               "ViewState": "AgIAAM4AAAAAAAAAAAAAANsAAAAEAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001407|",
-              "WhenOpened": "2026-09-20T02:10:23.13Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-09-20T02:10:23.13Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 0,
+              "DocumentIndex": 9,
               "Title": "nap_thang.py",
               "DocumentMoniker": "C:\\Users\\Admin\\source\\repos\\Thuan-Ethan\\bd04_giao_thong\\spark_jobs\\ingest\\nap_thang.py",
               "RelativeDocumentMoniker": "spark_jobs\\ingest\\nap_thang.py",

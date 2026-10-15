@@ -5,8 +5,11 @@
     "\\spark_jobs\\ingest",
     "\\spark_jobs\\ml",
     "\\spark_jobs\\streaming",
+    "\\spark_jobs\\transform",
+    "\\webapp",
+    "\\webapp\\backend",
     "\\webapp\\frontend"
   ],
-  "SelectedNode": "\\spark_jobs\\ingest\\nap_thang.py",
+  "SelectedNode": "\\spark_jobs\\ml\\huan_luyen.py",
   "PreviewInSolutionExplorer": false
 }
