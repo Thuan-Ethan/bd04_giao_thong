@@ -3,7 +3,7 @@ spark_jobs/ingest/nap_thang.py
 
 Nạp 1 tháng Yellow Taxi (Parquet trên HDFS) vào bảng Delta bronze.chuyen_di.
 
-Yêu cầu:
+Yêu cầu đề cương (mục 4.4, 4.5, 4.7):
   - Giữ nguyên schema từng tháng, hợp nhất bằng schema evolution (mergeSchema)
   - Phân vùng theo nam, thang (generated column sinh từ thời điểm đón)
   - Idempotent: chạy lại cùng tháng thì COUNT(*) không đổi (MERGE theo ma_chuyen)
@@ -134,13 +134,19 @@ def nap_bang_merge(spark, df):
                .withColumn("thang", F.month(PICKUP_COL)))
 
     bang = DeltaTable.forPath(spark, BRONZE_PATH)
+    version_truoc = bang.history(1).select("version").first()[0]
+
     (bang.alias("t")
          .merge(nguon.alias("s"), "t.ma_chuyen = s.ma_chuyen")
          .whenNotMatchedInsertAll()
          .execute())
 
-    metrics = bang.history(1).select("operationMetrics").first()[0]
-    return int(metrics.get("numTargetRowsInserted", 0))
+    lich_su = bang.history(1).select("version", "operationMetrics").first()
+    if lich_su["version"] == version_truoc:
+        # MERGE không có dòng nào để chèn nên Delta không tạo phiên bản mới.
+        # Phải kiểm tra điều này, nếu không history(1) trả về lần ghi cũ và báo sai số dòng chèn.
+        return 0
+    return int(lich_su["operationMetrics"].get("numTargetRowsInserted", 0))
 
 
 def main():
