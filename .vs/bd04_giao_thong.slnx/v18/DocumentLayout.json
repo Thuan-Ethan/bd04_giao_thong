@@ -100,7 +100,7 @@
               "RelativeDocumentMoniker": "spark_jobs\\ml\\huan_luyen.py",
               "ToolTip": "C:\\Users\\Admin\\source\\repos\\Thuan-Ethan\\bd04_giao_thong\\spark_jobs\\ml\\huan_luyen.py",
               "RelativeToolTip": "spark_jobs\\ml\\huan_luyen.py",
-              "ViewState": "AgIAAH4AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "ViewState": "AgIAAMAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.002457|",
               "WhenOpened": "2026-10-13T13:19:08.661Z",
               "EditorCaption": ""
@@ -115,8 +115,7 @@
               "RelativeToolTip": "spark_jobs\\ml\\xu_ly_va_du_bao.py",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.002457|",
-              "WhenOpened": "2026-10-13T13:19:07.059Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-10-13T13:19:07.059Z"
             },
             {
               "$type": "Document",
@@ -128,8 +127,7 @@
               "RelativeToolTip": "spark_jobs\\streaming\\nhan_chuyen_streaming.py",
               "ViewState": "AgIAAEgAAAAAAAAAAAAAAE4AAAAwAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.002457|",
-              "WhenOpened": "2026-10-13T13:18:30.51Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-10-13T13:18:30.51Z"
             },
             {
               "$type": "Document",
@@ -141,8 +139,7 @@
               "RelativeToolTip": "spark_jobs\\transform\\va_knn_nhu_cau.py",
               "ViewState": "AgIAAG8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.002457|",
-              "WhenOpened": "2026-10-13T13:18:17.205Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-10-13T13:18:17.205Z"
             },
             {
               "$type": "Document",
@@ -154,8 +151,7 @@
               "RelativeToolTip": "spark_jobs\\transform\\va_du_lieu_knn_spark.py",
               "ViewState": "AgIAAGYAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.002457|",
-              "WhenOpened": "2026-10-13T13:18:11.05Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-10-13T13:18:11.05Z"
             },
             {
               "$type": "Document",
@@ -167,8 +163,7 @@
               "RelativeToolTip": "spark_jobs\\transform\\lam_sach_silver.py",
               "ViewState": "AgIAANUAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.002457|",
-              "WhenOpened": "2026-10-13T13:17:38.403Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-10-13T13:17:38.403Z"
             },
             {
               "$type": "Document",
@@ -180,8 +175,7 @@
               "RelativeToolTip": "spark_jobs\\transform\\tao_nhu_cau_vung_gio.py",
               "ViewState": "AgIAAGwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.002457|",
-              "WhenOpened": "2026-10-13T12:41:54.568Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-10-13T12:41:54.568Z"
             },
             {
               "$type": "Document",
@@ -193,8 +187,7 @@
               "RelativeToolTip": "webapp\\frontend\\style.css",
               "ViewState": "AgIAAAMAAAAAAAAAAAAAAC4AAAAZAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003000|",
-              "WhenOpened": "2026-10-13T02:28:08.46Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-10-13T02:28:08.46Z"
             },
             {
               "$type": "Document",
@@ -206,8 +199,7 @@
               "RelativeToolTip": "webapp\\frontend\\index.html",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001512|",
-              "WhenOpened": "2026-10-13T02:28:02.738Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-10-13T02:28:02.738Z"
             },
             {
               "$type": "Document",
@@ -219,8 +211,7 @@
               "RelativeToolTip": "webapp\\frontend\\app.js",
               "ViewState": "AgIAADAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001646|",
-              "WhenOpened": "2026-10-13T02:27:54.072Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-10-13T02:27:54.072Z"
             },
             {
               "$type": "Document",
@@ -232,8 +223,7 @@
               "RelativeToolTip": "webapp\\backend\\doc_du_lieu.py",
               "ViewState": "AgIAAKwAAAAAAAAAAAAowLUAAABFAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.002457|",
-              "WhenOpened": "2026-10-13T02:27:15.126Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-10-13T02:27:15.126Z"
             },
             {
               "$type": "Document",
@@ -269,8 +259,7 @@
               "RelativeToolTip": "spark_jobs\\transform\\tao_ma_tran_od.py",
               "ViewState": "AgIAACQAAAAAAAAAAAAAAB8AAAAPAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.002457|",
-              "WhenOpened": "2026-09-25T10:59:27.665Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-09-25T10:59:27.665Z"
             },
             {
               "$type": "Document",
@@ -342,8 +331,7 @@
               "RelativeToolTip": "spark_jobs\\ingest\\nap_thang.py",
               "ViewState": "AgIAAEgAAAAAAAAAAAAAAJMAAAAKAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.002457|",
-              "WhenOpened": "2026-09-19T01:37:33.729Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-09-19T01:37:33.729Z"
             }
           ]
         }

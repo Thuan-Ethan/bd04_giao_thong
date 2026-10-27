@@ -1,8 +1,9 @@
 {
   "ExpandedNodes": [
     "",
+    "\\dags",
+    "\\docs",
     "\\spark_jobs",
-    "\\spark_jobs\\ingest",
     "\\spark_jobs\\ml",
     "\\spark_jobs\\streaming",
     "\\spark_jobs\\transform",
@@ -10,6 +11,5 @@
     "\\webapp\\backend",
     "\\webapp\\frontend"
   ],
-  "SelectedNode": "\\spark_jobs\\ml\\huan_luyen.py",
   "PreviewInSolutionExplorer": false
 }
