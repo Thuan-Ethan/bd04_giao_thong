@@ -1,15 +1,10 @@
 {
   "ExpandedNodes": [
     "",
-    "\\dags",
-    "\\docs",
     "\\spark_jobs",
-    "\\spark_jobs\\ml",
-    "\\spark_jobs\\streaming",
-    "\\spark_jobs\\transform",
-    "\\webapp",
-    "\\webapp\\backend",
+    "\\spark_jobs\\ingest",
     "\\webapp\\frontend"
   ],
+  "SelectedNode": "\\spark_jobs\\ingest\\nap_thang.py",
   "PreviewInSolutionExplorer": false
 }

@@ -3,7 +3,7 @@ spark_jobs/ingest/nap_thang.py
 
 Nạp 1 tháng Yellow Taxi (Parquet trên HDFS) vào bảng Delta bronze.chuyen_di.
 
-Yêu cầu đề cương (mục 4.4, 4.5, 4.7):
+Yêu cầu:
   - Giữ nguyên schema từng tháng, hợp nhất bằng schema evolution (mergeSchema)
   - Phân vùng theo nam, thang (generated column sinh từ thời điểm đón)
   - Idempotent: chạy lại cùng tháng thì COUNT(*) không đổi (MERGE theo ma_chuyen)
