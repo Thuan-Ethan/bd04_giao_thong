@@ -33,6 +33,7 @@ GOLD_PATH = f"{LAKE}/gold/nhu_cau_theo_vung_gio"
 LOOKUP_PATH = f"{HDFS}/data/tlc_raw/zones/taxi_zone_lookup.csv"
 
 VUNG_MAX = 263
+KIEU_DECIMAL = "decimal(18,6)"
 
 
 def parse_args():
@@ -83,26 +84,30 @@ def doc_bang_vung(spark):
 
 def tinh_nhu_cau(silver):
     """Gom silver theo (vùng đón, giờ đón). Nhu cầu của một vùng là số chuyến ĐÓN tại vùng đó."""
+    # Dùng DECIMAL thay vì DOUBLE khi cộng: cộng số thực phụ thuộc thứ tự dòng (không xác định
+    # giữa các lần chạy), còn cộng DECIMAL cho kết quả chính xác và giống hệt mỗi lần.
+    d = lambda c: F.col(c).cast(KIEU_DECIMAL)
     return (silver.groupBy(
                 F.col("vung_don").alias("vung"),
                 F.date_trunc("hour", F.col("thoi_diem_don")).alias("khung_gio"))
             .agg(F.count(F.lit(1)).alias("so_chuyen"),
-                 F.sum("tong_tien").alias("tong_doanh_thu"),
-                 F.avg("thoi_gian_phut").alias("thoi_gian_chuyen_tb"),
-                 F.avg("quang_duong_mile").alias("quang_duong_tb")))
+                 F.sum(d("tong_tien")).alias("tong_doanh_thu"),
+                 F.avg(d("thoi_gian_phut")).alias("thoi_gian_chuyen_tb"),
+                 F.avg(d("quang_duong_mile")).alias("quang_duong_tb")))
 
 
 def ghep_luoi(luoi, nhu_cau, dien_0_tb):
     g = luoi.join(nhu_cau, ["vung", "khung_gio"], "left")
-    tb = (lambda c: F.coalesce(F.col(c), F.lit(0.0))) if dien_0_tb else (lambda c: F.col(c))
+    khong = F.lit(0).cast(KIEU_DECIMAL)
+    tb = (lambda c: F.coalesce(F.col(c), khong)) if dien_0_tb else (lambda c: F.col(c))
+    # Làm tròn trên DECIMAL (HALF_UP, xác định) rồi mới đổi sang DOUBLE để lưu.
     return g.select(
         F.col("vung").cast("int").alias("vung"),
         F.col("khung_gio"),
         F.coalesce(F.col("so_chuyen"), F.lit(0)).cast("int").alias("so_chuyen"),
-        # Làm tròn để các lần chạy lại cho giá trị y hệt (tổng số thực phụ thuộc thứ tự cộng)
-        F.round(F.coalesce(F.col("tong_doanh_thu"), F.lit(0.0)), 2).alias("tong_doanh_thu"),
-        F.round(tb("thoi_gian_chuyen_tb"), 4).alias("thoi_gian_chuyen_tb"),
-        F.round(tb("quang_duong_tb"), 4).alias("quang_duong_tb"),
+        F.round(F.coalesce(F.col("tong_doanh_thu"), khong), 2).cast("double").alias("tong_doanh_thu"),
+        F.round(tb("thoi_gian_chuyen_tb"), 4).cast("double").alias("thoi_gian_chuyen_tb"),
+        F.round(tb("quang_duong_tb"), 4).cast("double").alias("quang_duong_tb"),
     )
 
 
