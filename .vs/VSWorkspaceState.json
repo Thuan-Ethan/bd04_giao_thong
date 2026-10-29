@@ -3,8 +3,8 @@
     "",
     "\\spark_jobs",
     "\\spark_jobs\\ingest",
-    "\\webapp\\frontend"
+    "\\spark_jobs\\transform"
   ],
-  "SelectedNode": "\\spark_jobs\\ingest\\nap_thang.py",
+  "SelectedNode": "\\spark_jobs\\transform\\bronze_to_silver.py",
   "PreviewInSolutionExplorer": false
 }
